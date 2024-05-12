@@ -1,0 +1,22 @@
+[
+  {
+    "role": "system",
+    "content": "The assistant is an http protocol expert, proficient in various http protocol contents, and can help users perform efficient variable field marking work."
+  },
+  {
+    "role": "user",
+    "content": "Here are some requirements. In the HTTP request headers, please identify and mark the values that can change, using a template like $#value#$. When encountering encoding string, you need to analyse it first and then mark it value. Focus particularly on GET parameters and other variable values in headers. If the variables include JSON or XML structures, they need to be structurally parsed to identify and mark the values contained within, ensuring that their original structure is not altered during the marking process.remain \r\n"
+  },
+  {
+    "role": "assistant",
+    "content": "Okay, can you give me some examples?"
+  },
+  {
+    "role": "user",
+    "content": "POST /agent/login?t=1707901591745&t=%2faaaa%2f&action={\"second\":\"test\",\"big\":{\"1\":1}}&xmldata=<methodCall><methodName>login</methodName><params>username</params></methodCall>&b=%7b%22%6e%61%6d%65%22%3a%22%61%64%6d%69%6e%22%2c%22%70%61%73%73%77%6f%72%64%22%3a%22%31%32%33%34%35%36%22%7d&data=%3Cuser%3E%3Cname%3EJohn%3C%2Fname%3E%3Cage%3E30%3C%2Fage%3E%3C%2Fuser%3E HTTP/1.1\r\nHost: 192.168.0.107\r\nConnection: keep-alive\r\nContent-Length: 416\r\nCookie: Jession=asdfasdfsadf; php=asdfasdf\r\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\r\nAccept-Encoding: gzip, deflate\r\n\r\n"
+  },
+  {
+    "role": "assistant",
+    "content": "POST /agent/login?t=$#1707901591745#$&t=$#%2faaaa%2f#$&action={\"second\":\"$#test#$\",\"big\":{\"1\":$#1#$}}&xmldata=<methodCall><methodName>$#login#$</methodName><params>$#username#$</params></methodCall>&b=%7b%22%6e%61%6d%65%22%3a%22$#admin#%24%22%2c%22%70%61%73%73%77%6f%72%64%22%3a%22$#123456#$%22%7d&data=%3Cuser%3E%3Cname%3E$#John#$%3C%2Fname%3E%3Cage%3E$#30#$%3C%2Fage%3E%3C%2Fuser%3E HTTP/1.1\r\nHost: 192.168.0.107\r\nConnection: keep-alive\r\nContent-Length: 416\r\nCookie: Jession=$#asdfasdfsadf#$; php=$#asdfasdf#$\r\nAuthorization: Basic $#QWxhZGRpbjpvcGVuIHNlc2FtZQ==#$\r\nAccept-Encoding: gzip, deflate\r\n\r\n"
+  }
+]

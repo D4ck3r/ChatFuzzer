@@ -1,0 +1,46 @@
+[
+  {
+    "role": "system",
+    "content": "The assistant is an http protocol expert, proficient in various http protocol contents, and can help users perform efficient variable field marking work."
+  },
+  {
+    "role": "user",
+    "content": "The input provided by the user is the request content part of the HTTP protocol. The variables in the request are extracted based on the provided content, and the data values that can be changed are marked. Use a template similar to $#value#$ to mark.When encountering encoding string, you need to analyse it first and then mark it value. If the variable contains json Or xml structure, you need to find the value in it after structure analysis and mark it without changing its original structure.remain \r\n"
+  },
+  {
+    "role": "assistant",
+    "content": "Okay, can you give me some examples?"
+  },
+  {
+    "role": "user",
+    "content": "t=1707901591745&t=%2faaaa%2f&action={\"second\":\"test\",\"big\":{\"1\":1}}&xmldata=<methodCall><methodName>login</methodName><params>username</params></methodCall>&b=%7b%22%6e%61%6d%65%22%3a%22%61%64%6d%69%6e%22%2c%22%70%61%73%73%77%6f%72%64%22%3a%22%31%32%33%34%35%36%22%7d&c=&d=1"
+  },
+  {
+    "role": "assistant",
+    "content": "t=$#1707901591745#$&t=$#%2faaaa%2f#$&action={\"second\":\"$#test#$\",\"big\":{\"1\":$#1#$}}&xmldata=<methodCall><methodName>$#login#$</methodName><params>$#username#$</params></methodCall>&b=%7b%22%6e%61%6d%65%22%3a%22$#admin#%24%22%2c%22%70%61%73%73%77%6f%72%64%22%3a%22$#123456#$%22%7d&c=$##$&d=$#1#$"
+  },
+  {
+    "role": "user",
+    "content": "------WebKitFormBoundarysdliWQWreXtOtxWU\r\nContent-Disposition: form-data; name=\"sf_action_id\"\r\n\r\n4f18592251a5c728f0feb1bc17231d3512\r\n------WebKitFormBoundarysdliWQWreXtOtxWU\r\nContent-Disposition: form-data; name=\"function\"\r\n\r\nSF::MultiTenancy::getDomainInfo1\r\n------WebKitFormBoundarysdliWQWreXtOtxWU\r\nContent-Disposition: form-data; name=\"parameters\"\r\n\r\n[]\r\n------WebKitFormBoundarysdliWQWreXtOtxWU--\r\nContent-Disposition: form-data; name=\"file\"; filename=\"doc.pdf\"\r\nContent-Type: application/pdf\r\n\r\nxxxxx\r\n------WebKitFormBoundaryRgXjT0S5HQa5B16r--\r\n"
+  },
+  {
+    "role": "assistant",
+    "content": "------WebKitFormBoundarysdliWQWreXtOtxWU\r\nContent-Disposition: form-data; name=\"$#sf_action_id#$\"\r\n\r\n$#4f18592251a5c728f0feb1bc17231d3512#$\r\n------WebKitFormBoundarysdliWQWreXtOtxWU\r\nContent-Disposition: form-data; name=\"$#function#$\"\r\n\r\n$#SF::MultiTenancy::getDomainInfo1#$\r\n------WebKitFormBoundarysdliWQWreXtOtxWU\r\nContent-Disposition: form-data; name=\"$#parameters#$\"\r\n\r\n[$##$]\r\n------WebKitFormBoundarysdliWQWreXtOtxWU--\nContent-Disposition: form-data; name=\"$#file#$\"; filename=\"$#doc.pdf#$\"\nContent-Type: application/pdf\n\nxxxxx\n------WebKitFormBoundaryRgXjT0S5HQa5B16r--\n"
+  },
+  {
+    "role": "user",
+    "content": "<tab1><subtab1>value1</subtab1><subtab2>value2</subtab2></tab1>"
+  },
+  {
+    "role": "assistant",
+    "content": "<tab1><subtab1>$#value1#$</subtab1><subtab2>$#value2#$</subtab2></tab1>"
+  },
+  {
+    "role": "user",
+    "content": "Please answer strictly based on my requirements and examples!!! Do not mark the entire data in json xml and other formats, only mark the values in it.!!!"
+  },
+  {
+    "role": "assistant",
+    "content": "ok , please input "
+  }
+]
