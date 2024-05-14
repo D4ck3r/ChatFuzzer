@@ -4,7 +4,7 @@ import asyncio
 class AsyncPriorityQueue:
     def __init__(self):
         self.queue = asyncio.PriorityQueue()
-
+        
     async def put_item(self, item, priority):
         await self.queue.put((priority, item))
         print(f'add：{item}，priority：{priority}')

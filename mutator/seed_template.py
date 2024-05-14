@@ -6,40 +6,54 @@ class SeedTemplate:
         self.header_unmarked_fields = []
         self.content_marked_fields = []
         self.content_unmarked_fields = []
+        # self.send_header = None
+        # self.send_content = None
         self.label_head = ''
         self.label_content = ''
         self.priority = priority
+        self.id = None
 
     def is_type(self, s):
-        if re.match(r'^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$', s.strip()):
+        if re.match(rb'^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$', s.strip()):
             return "num"
         else:
             return "str"
-
+        
+    def set_id(self, id):
+        self.id = id
+        
     def extract_and_separate_fields(self, data):
-        pattern = re.compile(r'\$#([^#]+)#\$')
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+        pattern = re.compile(rb'\$#([^#]+)#\$')
         fields = re.split(pattern, data)
-        marked_fields = [(f, self.is_type(f),0) for i, f in enumerate(fields) if i % 2 != 0]
+        marked_fields = [[f, self.is_type(f),0] for i, f in enumerate(fields) if i % 2 != 0]
         unmarked_fields = [f for i, f in enumerate(fields) if i % 2 == 0]
         return marked_fields, unmarked_fields
 
-    def set_header(self, label_head):
+    def set_label_header(self, label_head):
         self.label_head = label_head
         self.header_marked_fields, self.header_unmarked_fields = self.extract_and_separate_fields(label_head)
     
-    def set_content(self, label_content):
+    def set_label_content(self, label_content):
         self.label_content = label_content
         self.content_marked_fields, self.content_unmarked_fields = self.extract_and_separate_fields(label_content)
 
+    # def set_send_header(self, send_header):
+    #     self.send_header = send_header
+
+    # def set_send_content(self, send_content):
+    #     self.send_content = send_content
+
     def reconstruct_packet(self):
-        reconstructed_packet = ""
+        reconstructed_packet = b""
         # 处理头部信息
         for unmarked, (marked, type_, num_) in zip(self.header_unmarked_fields, self.header_marked_fields):
             reconstructed_packet += unmarked + marked
         if len(self.header_unmarked_fields) > len(self.header_marked_fields):
             reconstructed_packet += self.header_unmarked_fields[-1]
 
-        reconstructed_packet += "\r\n"
+        reconstructed_packet += b"\r\n"
         # 处理内容信息
         for unmarked, (marked, type_, num_) in zip(self.content_unmarked_fields, self.content_marked_fields):
             reconstructed_packet += unmarked + marked
@@ -70,7 +84,10 @@ Cookie: password=$#7da188c2e2d83e38b7d9e75e500f1af8eqp5gk#$\r
 """
     
     content = "ddddd=$#asdf#$"
-    st = SeedTemplate()
-    st.set_header(head)
-    st.set_content(content)
-    st.reconstruct_packet()
+    st = SeedTemplate(1)
+    st.set_label_header(head)
+    st.set_label_content(content)
+    print(st.header_marked_fields)
+    print(st.content_marked_fields)
+    st.content_marked_fields[0][0] = "++++++++++++++++"
+    print(st.reconstruct_packet())

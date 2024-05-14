@@ -4,7 +4,6 @@ from utils import utils
 import random
 import time
 from mutator.seed_template import SeedTemplate
-
 from gpt.gpt_request import OpenAIChatbot
 
 chatbot_header = OpenAIChatbot(config_file="config.ini", chat_type="header")
@@ -12,14 +11,15 @@ chatbot_content = OpenAIChatbot(config_file="config.ini", chat_type="content")
 
 
 async def generate_seed_template(item,label_head,label_content):
-    seedtemplate = SeedTemplate(1)
-    seedtemplate.set_header = label_head
-    seedtemplate.set_content = label_content
-    print(label_head)
-    print(label_content)
-    await utils.seed_temple_queue.put_item(seedtemplate, priority=1)
+    seedtemplate = SeedTemplate(priority = 1)
+    seedtemplate.set_id(utils.generate_uuid4())
+    seedtemplate.set_label_header(label_head)
+    seedtemplate.set_label_content(label_content)
+    # print(label_head)
+    # print(label_content)
+    await utils.seed_template_queue.put_item(seedtemplate, priority=1)
 
-async def process_item(item):
+async def process_item(item, queue):
     '''
     {"rawhttp":item,
     "feature_content":res,
@@ -35,11 +35,14 @@ async def process_item(item):
     label_content = ''
     if head:
         label_head = await chatbot_header.chat(head)
-
     if content:
         label_content = await chatbot_content.chat(content)
 
-    await generate_seed_template(item,label_head,label_content)
+    if label_head == "error" or label_content == "error":
+        await queue.put(item)
+        if item['hash'] in utils.global_dict:
+            utils.global_dict.pop(item['hash'])
+    await generate_seed_template(item, label_head, label_content)
     print(item["hash"])
 
 
@@ -52,7 +55,7 @@ async def consume(queue, index):
             queue.task_done()
             break
         # 在线程池中处理项目
-        await process_item(item)
+        await process_item(item, queue)
         queue.task_done()
 
 # async def adds(queue):

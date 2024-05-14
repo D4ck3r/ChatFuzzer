@@ -55,16 +55,17 @@ class OpenAIChatbot:
             try:
                 response = await client.post(self.endpoint, headers=self.headers, json=data)
                 if response.status_code == 429:
-                    return ''
+                    return 'error'
                 response_text = response.json()['choices'][0]['message']['content']
+                # print(response.content)
                 response_text = response_text.strip()
                 if '\r\n' not in response_text:
                     response_text = response_text.replace('\n', '\r\n')
                 response_text = response_text + '\r\n\r\n'
-                return response_text
+                return response_text.encode("utf-8")
             except httpx.HTTPError as e:
                 logging.error(f"GPT LLM Request error: {e}")
-                return ''
+                return 'error'
 
 async def main():
     chatbot = OpenAIChatbot(config_file="../config.ini", chat_type="header")
