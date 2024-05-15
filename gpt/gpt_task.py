@@ -11,12 +11,13 @@ chatbot_content = OpenAIChatbot(config_file="config.ini", chat_type="content")
 
 
 async def generate_seed_template(item,label_head,label_content):
-    seedtemplate = SeedTemplate(priority = 1)
+    seedtemplate = SeedTemplate(map_id = item["hash"], priority = 1)
     seedtemplate.set_id(utils.generate_uuid4())
     seedtemplate.set_label_header(label_head)
     seedtemplate.set_label_content(label_content)
     # print(label_head)
     # print(label_content)
+    utils.global_dict[item["hash"]]["seedtemplate"] = seedtemplate
     await utils.seed_template_queue.put_item(seedtemplate, priority=1)
 
 async def process_item(item, queue):
@@ -42,9 +43,10 @@ async def process_item(item, queue):
         await queue.put(item)
         if item['hash'] in utils.global_dict:
             utils.global_dict.pop(item['hash'])
-    await generate_seed_template(item, label_head, label_content)
-    print(item["hash"])
-
+    else:
+        await generate_seed_template(item, label_head, label_content)
+        print(item["hash"])
+    # await asyncio.sleep(40)
 
 async def consume(queue, index):
     while True:

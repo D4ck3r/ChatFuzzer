@@ -13,17 +13,16 @@ class OpenAIChatbot:
         self.endpoint = self.config['OpenAI']['endpoint']
         self.proxy = self.config['OpenAI']['proxy']
         self.gpt_config = self.config['GPT-Turbo']
+        
         if chat_type == "header":
             self.session_file_path = self.config['Session']['header_session']
         elif chat_type == "content":
             self.session_file_path = self.config['Session']['content_session']
-        if self.proxy:
+        if self.proxy != "":
             self.proxies = {
                 'http://': f'http://{self.proxy}',
                 'https://': f'http://{self.proxy}',
             }
-        else:
-            self.proxies = {}
         self.headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",

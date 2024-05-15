@@ -1,7 +1,7 @@
 import re
 
 class SeedTemplate:
-    def __init__(self, priority):
+    def __init__(self, priority, map_id):
         self.header_marked_fields = []
         self.header_unmarked_fields = []
         self.content_marked_fields = []
@@ -12,6 +12,7 @@ class SeedTemplate:
         self.label_content = ''
         self.priority = priority
         self.id = None
+        self.map_id = map_id
 
     def is_type(self, s):
         if re.match(rb'^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$', s.strip()):
@@ -53,21 +54,35 @@ class SeedTemplate:
         if len(self.header_unmarked_fields) > len(self.header_marked_fields):
             reconstructed_packet += self.header_unmarked_fields[-1]
 
-        reconstructed_packet += b"\r\n"
+        # reconstructed_packet += b"\r\n"
         # 处理内容信息
-        for unmarked, (marked, type_, num_) in zip(self.content_unmarked_fields, self.content_marked_fields):
-            reconstructed_packet += unmarked + marked
-        if len(self.content_unmarked_fields) > len(self.content_marked_fields):
-            reconstructed_packet += self.content_unmarked_fields[-1]
 
+        content_packet = b""
+        for unmarked, (marked, type_, num_) in zip(self.content_unmarked_fields, self.content_marked_fields):
+            content_packet += unmarked + marked
+        if len(self.content_unmarked_fields) > len(self.content_marked_fields):
+            content_packet += self.content_unmarked_fields[-1]
+
+        content_length = len(content_packet)
+        reconstructed_packet = self.update_content_length(reconstructed_packet, content_length)
+        reconstructed_packet += content_packet
+        
         return reconstructed_packet
     
+    def update_content_length(self, header: bytes, new_length: int) -> bytes:
+        pattern = re.compile(rb'(?<=Content-Length: )\d+(?=\r\n)')
+        # 将新的内容长度转换为字节串
+        replacement = str(new_length).encode('utf-8')
+        # 使用正则表达式进行替换
+        updated_header = re.sub(pattern, replacement, header)
+        return updated_header
+
     def __lt__(self, other):
             # 比较两个 SeedTemplate 实例的优先级
             return self.priority < other.priority
 
 if __name__ == "__main__":
-    head = """
+    head = b"""
 POST /login/Auth HTTP/1.1\r
 Host: 192.168.0.200\r
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:$#125.0#$) Gecko/20100101 Firefox/$#125.0#$\r
@@ -83,11 +98,11 @@ Referer: http://192.168.0.200/login.html\r
 Cookie: password=$#7da188c2e2d83e38b7d9e75e500f1af8eqp5gk#$\r
 """
     
-    content = "ddddd=$#asdf#$"
-    st = SeedTemplate(1)
+    content = b"ddddd=$#asdf#$"
+    st = SeedTemplate(1, "xx")
     st.set_label_header(head)
     st.set_label_content(content)
     print(st.header_marked_fields)
     print(st.content_marked_fields)
-    st.content_marked_fields[0][0] = "++++++++++++++++"
+    st.content_marked_fields[0][0] = b"++++++++++++++++"
     print(st.reconstruct_packet())

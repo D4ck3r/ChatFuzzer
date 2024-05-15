@@ -9,44 +9,44 @@ class Mutator:
         self.rad = Radamsa()
         self.ms = mutation_strategy.MutationStrategy()
 
-    def header_mutator(self, data):
-        print(data.header_marked_fields)
-        return mutated_data
+    async def header_mutator(self, data):
+        logging.info("mutator header: ")
+        for index, (value, type_, count) in enumerate(data.header_marked_fields):
+            res = self.ms.mutator(value, type_)
+            # res.extend(self.ms.radamsa_mutator(value, 100))
+            await self.header_reconstruct(data, index, res)
 
-    def content_mutator(self, data):
+    async def content_mutator(self, data):
         # rad = Radamsa()
         # muta_data = self.rad.fuzz(data.encode("utf-8"))
-        logging.info("mutator str: ")
-     
-        print(data.content_marked_fields)
+        logging.info("mutator content: ")
+        # print(data.content_marked_fields)
         for index, (value, type_, count) in enumerate(data.content_marked_fields):
-            # single 
             res = self.ms.mutator(value, type_)
-            res.extend(self.ms.radamsa_mutator(value, 100))
-            self.content_reconstruct(data, index, res)
-          
-    def content_reconstruct(self, fields_array, index, res):
+            # res.extend(self.ms.radamsa_mutator(value, 100))
+            res.extend(self.ms.inject_mutator(data.map_id))
+            await self.content_reconstruct(data, index, res)
+
+    async def content_reconstruct(self, fields_array, index, res):
         for item in res:
             recover = fields_array.content_marked_fields[index][0]
             fields_array.content_marked_fields[index][0] = item
-            # data.send_content = temp
-            # data.send_header = data.header_marked_fields
-            print(fields_array.reconstruct_packet())
+            package = fields_array.reconstruct_packet()
+            await utils.content_send_queue.put(package)
             fields_array.content_marked_fields[index][0] = recover
-        # return mutated_fields
+        
+    async def header_reconstruct(self, fields_array, index, res):
+        for item in res:
+            recover = fields_array.header_marked_fields[index][0]
+            fields_array.header_marked_fields[index][0] = item
+            package = fields_array.reconstruct_packet()
+            await utils.header_send_queue.put(package)
+            fields_array.header_marked_fields[index][0] = recover
 
-    # def header_reconstruct(self, fields_array, index, res):
-    #     for item in res:
-    #         recover = fields_array.content_marked_fields[index][0]
-    #         fields_array.content_marked_fields[index][0] = item
-    #         # data.send_content = temp
-    #         # data.send_header = data.header_marked_fields
-    #         print(fields_array.reconstruct_packet())
-    #         fields_array.content_marked_fields[index][0] = recover
-
-    def process_item(self, item):
+    async def process_item(self, item):
         # logging.info(item)
-        self.content_mutator(item)
+        await self.content_mutator(item)
+        await self.header_mutator(item)
         print(item)
         logging.info("mutator process_item")
 
@@ -55,7 +55,7 @@ class Mutator:
             logging.info("mutator begain")
             item = await queue.get_item()
             logging.info("Priority: %s"%(item.priority))
-            self.process_item(item)
+            await self.process_item(item)
             # await asyncio.sleep(3)
             logging.info(f"Consumer {index} processed an item")
             # await queue.put_item(item, 2)

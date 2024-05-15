@@ -1,9 +1,9 @@
 from utils import utils
-import time
 from sender.sender import Sender
 import asyncio
 import re
 import logging
+
 class SessionMonitor:
     def __init__(self) -> None:
         self.config = utils.global_config
@@ -17,12 +17,11 @@ class SessionMonitor:
         try:
             with open(filename, 'rb') as file:
                 content = file.read()
-            return content.decode()
+            return content
         except FileNotFoundError:
             return "File not found"
         except Exception as e:
             return f"An error occurred: {str(e)}"
-        
 
     async def session_check(self):
         logging.info("send login_check package")
@@ -32,8 +31,7 @@ class SessionMonitor:
             response = await self.sender.send_http_request(data, utils.session)
             if response:
                 is_redirect = "302 Redirect" in response.splitlines()[0]
-            else:
-                continue
+            else:                continue
             if is_redirect:
                 await self.session_login()
             else:
@@ -46,8 +44,9 @@ class SessionMonitor:
         session_regex = re.search(r"Set-Cookie: (.*)", response)
         session = session_regex.group(1) if session_regex else None
         if session:
-            utils.session = session
-        print(session)
+            utils.session = session.encode("utf-8")
+            await utils.write_to_file("monitor/session.data", utils.session.decode("utf-8"))
+        # print(session)
 
     async def manage_sessions(self):
         # Assume you want to run these concurrently

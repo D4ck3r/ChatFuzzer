@@ -41,8 +41,8 @@ class Sender:
         try:
             reader, writer = await asyncio.open_connection(self.host, self.port)
             if session:
-                package = re.sub(r"Cookie: .*", f"Cookie: {session}", package)
-            writer.write(package.encode("utf-8"))
+                package = re.sub(rb"Cookie: .*", b"Cookie: " + session, package)
+            writer.write(package)
             await writer.drain()
             response = await reader.read()
         except ConnectionRefusedError as e:
@@ -81,6 +81,6 @@ if __name__ == "__main__":
     sender = Sender(host, port)
     response = sender.send_http_request(package.encode())
     print(response)
-    while True:
-        response = sender.send_http_request(package.encode())
-        print(response)
+    # while True:
+    #     response = sender.send_http_request(package.encode())
+    #     print(response)

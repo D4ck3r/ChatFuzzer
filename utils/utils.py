@@ -5,10 +5,14 @@ import configparser
 from utils.linked_node import AsyncCircularLinkedList
 from utils.priority_queue import AsyncPriorityQueue
 import uuid
+import aiofiles
 
 raw_http_queue = None
 seed_template_queue = None
-seed_send_queue = None
+
+content_send_queue = None
+header_send_queue = None
+
 seed_template_link = None
 gpt_chat_queue = None
 global_config = None
@@ -27,13 +31,21 @@ async def init_seed_template_queue():
     global seed_template_queue
     seed_template_queue = AsyncPriorityQueue()
 
-async def init_seed_send_queue():
-    global seed_send_queue
-    seed_send_queue = AsyncPriorityQueue()
+async def init_content_send_queue():
+    global content_send_queue
+    content_send_queue = asyncio.Queue()
+
+async def init_header_send_queue():
+    global header_send_queue
+    header_send_queue = asyncio.Queue()
 
 async def init_seed_template_link():
     global seed_template_link
     seed_template_link = AsyncCircularLinkedList()
+
+async def init_raw_http_queue():
+    global raw_http_queue
+    raw_http_queue = asyncio.Queue()
 
 def calculate_md5(text):
     md5_obj = hashlib.md5()
@@ -59,3 +71,8 @@ def configure_logging():
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
+
+
+async def write_to_file(filename, content):
+    async with aiofiles.open(filename, mode='w') as file:
+        await file.write(content)
