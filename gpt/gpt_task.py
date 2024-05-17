@@ -41,8 +41,8 @@ async def process_item(item, queue):
 
     if label_head == "error" or label_content == "error":
         await queue.put(item)
-        if item['hash'] in utils.global_dict:
-            utils.global_dict.pop(item['hash'])
+        # if item['hash'] in utils.global_dict:
+        #     utils.global_dict.pop(item['hash'])
     else:
         await generate_seed_template(item, label_head, label_content)
         print(item["hash"])

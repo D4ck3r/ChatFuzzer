@@ -2,6 +2,7 @@ import socket
 import re
 import logging
 import asyncio
+import ssl
 
 class Sender:
     def __init__(self, host, port):
@@ -9,42 +10,29 @@ class Sender:
         self.port = port
         self.socket = None
 
-    # async def send_http_request(self, package, session=None):
-    #     self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #     try:
-    #         await self.socket.connect((self.host, self.port))
-    #         if session:
-    #             package = re.sub(r"Cookie: .*", f"Cookie: {session}", package)
-    #         await self.socket.sendall(package.encode("utf-8"))
-    #         response = b''
-    #         while True:
-    #             part = self.socket.recv(1024)
-    #             if not part:
-    #                 break
-    #             response += part
-    #     except ConnectionRefusedError as e:
-    #         logging.info(f"Error connecting to {self.host}:{self.port} - {e}")
-    #         return None
-    #     except socket.error as e:
-    #         logging.info(f"Socket error - {e}")
-    #         return None
-    #     except Exception as e:
-    #         logging.info(f"An error occurred - {e}")
-    #         return None
-    #     finally:
-    #         if self.socket:
-    #             self.socket.close()
-    #     return response.decode()
-
-    async def send_http_request(self, package, session=None):
+    async def send_http_request(self, package, session=None, timeout=60, fssl = None):
         writer = None  # 初始化writer为None
+        ssl_context = None
+        if fssl:
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False  # 禁止检查主机名
+            ssl_context.verify_mode = ssl.CERT_NONE  # 禁止验证证书
+
         try:
-            reader, writer = await asyncio.open_connection(self.host, self.port)
+            # 使用 asyncio.wait_for 添加超时处理
+            reader, writer = await asyncio.wait_for(asyncio.open_connection(self.host, self.port,ssl = ssl_context), timeout=timeout)
             if session:
                 package = re.sub(rb"Cookie: .*", b"Cookie: " + session, package)
             writer.write(package)
             await writer.drain()
-            response = await reader.read()
+            # 对读取操作也添加超时处理
+            response = await asyncio.wait_for(reader.read(), timeout=timeout)
+        except asyncio.TimeoutError:
+            logging.info(f"Operation timed out after {timeout} seconds")
+            return None
+        except ConnectionResetError as e:
+            logging.info(f"Connection was reset by peer - {e}")
+            return None
         except ConnectionRefusedError as e:
             logging.info(f"Error connecting to {self.host}:{self.port} - {e}")
             return None
@@ -56,6 +44,9 @@ class Sender:
                 writer.close()
                 await writer.wait_closed()
         return response.decode()
+    
+   
+
 # 使用例子
 if __name__ == "__main__":
     host = '192.168.0.200'

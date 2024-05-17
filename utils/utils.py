@@ -13,11 +13,22 @@ seed_template_queue = None
 content_send_queue = None
 header_send_queue = None
 
+vul_package_queue = None
+
 seed_template_link = None
 gpt_chat_queue = None
 global_config = None
 session = None
 global_dict = {}
+vul_package = []
+fssl = None
+
+def init_ssl(ftype):
+    global fssl
+    if ftype == "http":
+        fssl = None
+    elif ftype == "https":
+        fssl = True
 
 async def init_raw_http_queue():
     global raw_http_queue
@@ -39,6 +50,10 @@ async def init_header_send_queue():
     global header_send_queue
     header_send_queue = asyncio.Queue()
 
+async def init_vul_package_queue():
+    global vul_package_queue
+    vul_package_queue = asyncio.Queue()
+
 async def init_seed_template_link():
     global seed_template_link
     seed_template_link = AsyncCircularLinkedList()
@@ -49,7 +64,9 @@ async def init_raw_http_queue():
 
 def calculate_md5(text):
     md5_obj = hashlib.md5()
-    md5_obj.update(text.encode('utf-8'))
+    if isinstance(text, str):
+        text = text.encode('utf-8')
+    md5_obj.update(text)
     return md5_obj.hexdigest()
 
 def generate_uuid4():
@@ -74,5 +91,12 @@ def configure_logging():
 
 
 async def write_to_file(filename, content):
-    async with aiofiles.open(filename, mode='w') as file:
-        await file.write(content)
+    if isinstance(content, str):
+        content = content.encode('utf-8')
+    try:
+        async with aiofiles.open(filename, mode='wb') as file:
+            await file.write(content)
+        return True  
+    except Exception as e:
+        logging.error(f"write file  {filename} failed: {e}")
+        return False

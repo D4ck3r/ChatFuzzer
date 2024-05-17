@@ -26,21 +26,33 @@ class SessionMonitor:
     async def session_check(self):
         logging.info("send login_check package")
         data = self.get_package(self.check_package)
+        response = None
         while True:
             await asyncio.sleep(3)  # Non-blocking sleep
-            response = await self.sender.send_http_request(data, utils.session)
+            try:
+                response = await self.sender.send_http_request(data, utils.session, fssl= utils.fssl)
+            except ConnectionResetError as e:
+                logging.info(f"Connection was reset by peer - {e}")
+
             if response:
                 is_redirect = "302 Redirect" in response.splitlines()[0]
-            else:                continue
+            else:                
+                continue
             if is_redirect:
                 await self.session_login()
             else:
                 logging.info("login holding")
 
     async def session_login(self):
+        response = None
         logging.info("send login package")
         data = self.get_package(self.login_package)
-        response = await self.sender.send_http_request(data)
+        
+        try:
+            response = await self.sender.send_http_request(data)
+        except ConnectionResetError as e:
+            logging.info(f"Connection was reset by peer - {e}")
+
         session_regex = re.search(r"Set-Cookie: (.*)", response)
         session = session_regex.group(1) if session_regex else None
         if session:
