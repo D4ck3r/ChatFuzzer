@@ -3,6 +3,7 @@ import re
 import logging
 import asyncio
 import ssl
+from utils import utils
 
 class Sender:
     def __init__(self, host, port):
@@ -22,7 +23,7 @@ class Sender:
             # 使用 asyncio.wait_for 添加超时处理
             reader, writer = await asyncio.wait_for(asyncio.open_connection(self.host, self.port,ssl = ssl_context), timeout=timeout)
             if session:
-                package = re.sub(rb"Cookie: .*", b"Cookie: " + session, package)
+                package = utils.monitor_instance.restruct_session(session, package)
             writer.write(package)
             await writer.drain()
             # 对读取操作也添加超时处理

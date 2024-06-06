@@ -10,7 +10,8 @@ from fuzz.fuzzer import Fuzzer
 async def main():
     utils.configure_logging()
     utils.parse_config("config.ini")
-    utils.init_ssl(utils.global_config["Fuzzer"]["type"])
+    utils.init_ssl()
+    utils.init_monitor()
     await utils.init_seed_template_queue()
     await utils.init_raw_http_queue()
     await utils.init_gpt_chat_queue()
@@ -18,22 +19,21 @@ async def main():
     await utils.init_header_send_queue()
     await utils.init_vul_package_queue()
     consumer = AsyncRabbitMQConsumer()
-    # monitor = SessionMonitor()
     monitor = Monitor()
     mutator = Mutator()
     fuzzer = Fuzzer()
     await consumer.connect()
-   
+
+    # Algorithm 1
     rabbit_consumer = asyncio.create_task(consumer.start_consuming())  #receive message from rabbit mq
     producer_task = asyncio.create_task(consumers()) # preduce message and  send to gpt task
     gpt_task = asyncio.create_task(task(utils.gpt_chat_queue)) #gpt task generate seed template
-    # manage_sessions = asyncio.create_task(monitor.manage_sessions())# check session is alive
+    
+    # Algorithm 2
     monitor_task = asyncio.create_task(monitor.task(utils.vul_package_queue))
     mutator_task = asyncio.create_task(mutator.task(utils.seed_template_queue)) # mutator 
     fuzzer_task = asyncio.create_task(fuzzer.task(utils.header_send_queue, utils.content_send_queue))
-    # fuzzer_task =  asyncio.create_task(mutator.task(utils.seed_template_queue))
-    # template_seed_queue_task = asyncio.create_task(consumers())
-    # template_seed_link_task = asyncio.create_task(consumers())
+
     await asyncio.gather(rabbit_consumer, producer_task, gpt_task, monitor_task, mutator_task, fuzzer_task)
 
 if __name__ == '__main__':

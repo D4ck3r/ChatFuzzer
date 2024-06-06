@@ -25,19 +25,16 @@ class Fuzzer:
             logging.info(f"Connection was reset by peer - {e}")
             utils.vul_package.append(data)
             await utils.vul_package_queue.put(data)
-
-        if response:
-            is_redirect = "302 Redirect" in response.splitlines()[0]
         
-        if is_redirect:
-            self.header_send_queue.put(data)
-        print(response)
+        if response and utils.monitor_instance.check_login(response):
+            await self.header_send_queue.put(data)
+        # print(response)
 
     async def process_item(self, item):
         # logging.info(item)
         await self.header_fuzzer(item)
         # await self.content_fuzzer(item)
-        print(item)
+        # print(item)
         logging.info("fuzzer process_item")
 
     async def consume(self, queue, index, fuzz_type):

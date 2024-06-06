@@ -6,6 +6,7 @@ from utils.linked_node import AsyncCircularLinkedList
 from utils.priority_queue import AsyncPriorityQueue
 import uuid
 import aiofiles
+import importlib
 
 raw_http_queue = None
 seed_template_queue = None
@@ -15,6 +16,8 @@ header_send_queue = None
 
 vul_package_queue = None
 
+monitor_instance = None 
+
 seed_template_link = None
 gpt_chat_queue = None
 global_config = None
@@ -23,12 +26,20 @@ global_dict = {}
 vul_package = []
 fssl = None
 
-def init_ssl(ftype):
-    global fssl
+
+def init_ssl():
+    global fssl, ftype
+    ftype = global_config["Fuzzer"]["type"]
     if ftype == "http":
         fssl = None
     elif ftype == "https":
         fssl = True
+
+def init_monitor():
+    global monitor_instance
+    module = importlib.import_module(global_config["Fuzzer"]["module"])
+    class_ = getattr(module, global_config["Fuzzer"]["class_name"])
+    monitor_instance = class_()
 
 async def init_raw_http_queue():
     global raw_http_queue

@@ -7,6 +7,8 @@ class AsyncPriorityQueue:
         
     async def put_item(self, item, priority):
         await self.queue.put((priority, item))
+        # rounded_time = int(time.time() // 5) * 5
+        # await self.queue.put((rounded_time, priority, item))        
         print(f'add：{item}，priority：{priority}')
 
     async def get_item(self):

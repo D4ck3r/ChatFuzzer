@@ -34,11 +34,7 @@ class SessionMonitor:
             except ConnectionResetError as e:
                 logging.info(f"Connection was reset by peer - {e}")
 
-            if response:
-                is_redirect = "302 Redirect" in response.splitlines()[0]
-            else:                
-                continue
-            if is_redirect:
+            if response and utils.monitor_instance.check_login(response):
                 await self.session_login()
             else:
                 logging.info("login holding")
@@ -53,10 +49,8 @@ class SessionMonitor:
         except ConnectionResetError as e:
             logging.info(f"Connection was reset by peer - {e}")
 
-        session_regex = re.search(r"Set-Cookie: (.*)", response)
-        session = session_regex.group(1) if session_regex else None
-        if session:
-            utils.session = session.encode("utf-8")
+        if response:
+            utils.session = utils.monitor_instance.extract_session(response)
             await utils.write_to_file("monitor/session.data", utils.session.decode("utf-8"))
         # print(session)
 
