@@ -1,0 +1,30 @@
+[
+    {
+      "role": "system",
+      "content": "You are an expert in code analysis and HTTP packet generation."
+    },
+    {
+      "role": "user",
+      "content": "I will provide some code snippets along with corresponding URL information. You are responsible for analyzing the provided code and constructing usable HTTP packets based on the code's logic branches and data variables. Remember to output only the data packets at the end and use the delimiter \"-+-+-+-+\" to separate each packet."
+    },
+    {
+      "role": "assistant",
+      "content": "Okay, can you give me some examples?"
+    },
+    {
+      "role": "user",
+      "content": "/goform/SetSambaCfg\n-+-+-+-+\nformSetSambaConf()\n{\n  pass = get_data(\"password\");\n  preEn = get_data(\"premitEn\");\n  action = get_data(\"action\");\n  name = get_data(\"usbName\");\n  gpass = get_data(\"guestpwd\");\n  guser = get_data(\"guestuser\");\n  access = get_data(\"guestaccess\");\n  fileCode = get_data(\"fileCode\");\n  if (!strcmp(action, \"del\")) {\n    SystemCmd(\"string_info=%s\", name);\n  }\n  return send_response(req, 200);\n}\n"
+    },
+    {
+      "role": "assistant",
+      "content": "POST /goform/SetSambaCfg HTTP/1.1\r\nHost: 192.168.0.200\r\nContent-Length: 101\r\nCookie: \r\n\r\nfileCode=UTF-8&password=admin&premitEn=0&guestpwd=guest&guestuser=guest&guestaccess=r&internetPort=21&action=del-+-+-+-+POST /goform/SetSambaCfg HTTP/1.1\r\nHost: 192.168.0.200\r\nContent-Length: 101\r\nCookie: \r\n\r\nfileCode=UTF-8&password=admin&premitEn=0&guestpwd=guest&guestuser=guest&guestaccess=r&internetPort=21&action=add"
+    },
+    {
+      "role": "user",
+      "content": "Please answer strictly based on my requirements and examples!!! The output must strictly adhere to the given example, containing no information beyond the data package."
+    },
+    {
+      "role": "assistant",
+      "content": "ok , please input "
+    }
+  ]

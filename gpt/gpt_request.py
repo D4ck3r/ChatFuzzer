@@ -17,6 +17,11 @@ class OpenAIChatbot:
             self.session_file_path = self.config['Session']['header_session']
         elif chat_type == "content":
             self.session_file_path = self.config['Session']['content_session']
+        elif chat_type == "code":
+            self.session_file_path = self.config['Session']['code_session']
+        elif chat_type == "package_code":
+            self.session_file_path = self.config['Session']['package_code_session']
+
         if self.proxy:
             self.proxies = {
                 'http://': f'http://{self.proxy}',
@@ -42,6 +47,19 @@ class OpenAIChatbot:
         else:
             messages = [{"role": "system", "content": "You are a http protocol expert..."}]
         return messages
+    
+    def read_from_file(self):
+        filename = input("Please enter the filename: ")  # Prompting the user for the filename in English
+        try:
+            with open(filename, 'rb') as file:  # Ensuring the file is read with the correct encoding
+                content = file.read()  # Reading the file content as bytes
+                return content.decode('utf-8')  # Decoding the bytes to string using utf-8 encoding
+        except FileNotFoundError:  # Catching the case where the file does not exist
+            print(f"File {filename} not found.")
+            return ''
+        except Exception as e:  # Catching other potential exceptions
+            print(f"An error occurred while reading the file: {e}")
+            return ''
 
     async def chat(self, user_input):
         self.tmp_messages = self.messages.copy()

@@ -1,0 +1,65 @@
+/goinfo/setApModeCfg
+-------------------
+int __fastcall fromsetApModeCfg(int a1)
+{
+  int v1; // r0
+  char v4[512]; // [sp+10h] [bp-224h] BYREF
+  __int64 dest; // [sp+210h] [bp-24h] BYREF
+  char v6[4]; // [sp+218h] [bp-1Ch] BYREF
+  int v7; // [sp+21Ch] [bp-18h]
+  char *s1; // [sp+220h] [bp-14h]
+  int v9; // [sp+224h] [bp-10h]
+
+  *(_DWORD *)v6 = 0;
+  v7 = 0;
+  dest = 0LL;
+  v9 = 0;
+  memset(v4, 0, sizeof(v4));
+  s1 = (char *)fetch_postdata(a1, (int)"apModeEn", (int)"false");
+  GetValue((int)"sys.workmode", (int)v6);
+  if ( !strcmp(s1, "true") )
+  {
+    strcpy((char *)&dest, "ap");
+  }
+  else if ( !strcmp(s1, "false") )
+  {
+    strcpy((char *)&dest, "router");
+  }
+  if ( strcmp(v6, (const char *)&dest) )
+  {
+    if ( !strcmp(s1, "true") )
+    {
+      SetValue((int)"wans.location", (int)"0 0 0 0 0");
+      SetValue((int)"sys.workmode", (int)"ap");
+      SetValue((int)"wl2g.public.mode", (int)"ap");
+      SetValue((int)"wl5g.public.mode", (int)"ap");
+      SetValue((int)"wans.flag", (int)&byte_EF0B8);
+      SetValue((int)"iptv.enable", (int)"0");
+      doSystemCmd("nvram set iptv.enable=0");
+      SetValue((int)"iptv.stb.enable", (int)"0");
+      doSystemCmd("nvram unset iptv.stb.enable");
+      SetValue((int)"igmp.enable", (int)"0");
+      SetValue((int)"wl.guest.dhcps_enable", (int)"0");
+      SetValue((int)"wl5g.ssid1.enable", (int)"0");
+      SetValue((int)"wl2g.ssid1.enable", (int)"0");
+      SetValue((int)"wl2g.ssid1.guest_enable", (int)"0");
+      v1 = SetValue((int)"wl5g.ssid1.guest_enable", (int)"0");
+    }
+    else
+    {
+      v1 = strcmp(s1, "false");
+      if ( !v1 )
+      {
+        SetValue((int)"wans.location", (int)"1 0 0 0 0");
+        SetValue((int)"sys.workmode", (int)"router");
+        v1 = SetValue((int)"dhcps.en", (int)&byte_EF0B8);
+      }
+    }
+    if ( !CommitCfm(v1) )
+      v9 = 1;
+    if ( !v9 )
+      tpi_systool_reboot();
+  }
+  sprintf(v4, "{\"errCode\":%d}", v9);
+  return sub_9CCBC(a1, v4);
+}
