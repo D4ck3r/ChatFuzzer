@@ -36,6 +36,13 @@ def check_statics(header_one):
     ]
     return any(url_path.lower().endswith(ext) for ext in static_extensions)
 
+def extract_host(content):
+    host_pattern = re.compile(r'Host:\s*(.*)', re.IGNORECASE)
+    match = host_pattern.search(content)
+    if match:
+        return match.group(1).strip()
+    return None
+
 def feature_extraction(content):
     header, content = split_http_request(content)
     header_one = head_one_line(header)
@@ -43,8 +50,9 @@ def feature_extraction(content):
     merge = header_one + content
     res = remove_random(merge)
     res = remove_blank(res)
+    host = extract_host(content)
     # print(res)
-    return calculate_md5(res),res,flag,{"header": header, "content": content}
+    return calculate_md5(res),res,flag,{"header": header, "content": content},host
 
 if __name__ == '__main__':
     feature_extraction("en=user_engagement&_et=1209&en=page_view&_ee=1&ep.version=6.6.1&ep.build=90&ep.model=Cisco%20Firepower%20Management%20Center%20for%20VMWare&ep.appliance_id=6ee7825b0ebc9ab0aefaf45c1c5583f466312c9f2c7955a7d376e6e45dd4d1d4&ep.theme=light&dt=Cisco%20Firepower%20Management%20Center%20for%20VMWare%206.6.1-90&dp=%2Fui%2Flogin")

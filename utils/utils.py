@@ -7,6 +7,7 @@ from utils.priority_queue import AsyncPriorityQueue
 import uuid
 import aiofiles
 import importlib
+import os 
 
 raw_http_queue = None
 seed_template_queue = None
@@ -29,7 +30,7 @@ fssl = None
 
 def init_ssl():
     global fssl, ftype
-    ftype = global_config["Fuzzer"]["type"]
+    ftype = global_config[global_config["Fuzzer"]["name"]]["type"]
     if ftype == "http":
         fssl = None
     elif ftype == "https":
@@ -37,8 +38,8 @@ def init_ssl():
 
 def init_monitor():
     global monitor_instance
-    module = importlib.import_module(global_config["Fuzzer"]["module"])
-    class_ = getattr(module, global_config["Fuzzer"]["class_name"])
+    module = importlib.import_module(global_config[global_config["Fuzzer"]["name"]]["module"])
+    class_ = getattr(module, global_config[global_config["Fuzzer"]["name"]]["class_name"])
     monitor_instance = class_()
 
 async def init_raw_http_queue():
@@ -92,7 +93,7 @@ def configure_logging():
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
-                        filename='../project.log',
+                        filename='project.log',
                         filemode='a')
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
@@ -111,3 +112,17 @@ async def write_to_file(filename, content):
     except Exception as e:
         logging.error(f"write file  {filename} failed: {e}")
         return False
+    
+
+
+def clear_folder_contents(folder_path):
+    # 检查文件夹是否存在
+    if os.path.exists(folder_path):
+        # 遍历文件夹中的所有文件和子文件夹
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                try:
+                    os.unlink(file_path)
+                except Exception as e:
+                    print(f'Failed to delete {file_path}. Reason: {e}')

@@ -5,10 +5,12 @@ import random
 import time
 from mutator.seed_template import SeedTemplate
 from gpt.gpt_request import OpenAIChatbot
+import os 
+import pickle
+import aiofiles
 
 chatbot_header = OpenAIChatbot(config_file="config.ini", chat_type="header")
 chatbot_content = OpenAIChatbot(config_file="config.ini", chat_type="content")
-
 
 async def generate_seed_template(item,label_head,label_content):
     seedtemplate = SeedTemplate(map_id = item["hash"], priority = 1)
@@ -18,6 +20,10 @@ async def generate_seed_template(item,label_head,label_content):
     # print(label_head)
     # print(label_content)
     utils.global_dict[item["hash"]]["seedtemplate"] = seedtemplate
+    if utils.global_config["Fuzzer"]["model"] == "DEBUG":
+        async with aiofiles.open(os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], str(seedtemplate.id)), 'wb') as file:
+            await file.write(pickle.dumps(seedtemplate))
+       
     await utils.seed_template_queue.put_item(seedtemplate, priority=1)
 
 async def process_item(item, queue):

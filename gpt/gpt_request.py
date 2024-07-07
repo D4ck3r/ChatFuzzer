@@ -72,7 +72,7 @@ class OpenAIChatbot:
             "top_p": int(self.gpt_config['top_p']),
             "n": int(self.gpt_config['n'])
         }
-        async with httpx.AsyncClient(proxies=self.proxies) as client:
+        async with httpx.AsyncClient(proxies=self.proxies, timeout=10) as client:
             try:
                 response = await client.post(self.endpoint, headers=self.headers, json=data)
                 if response.status_code == 429:
@@ -86,6 +86,9 @@ class OpenAIChatbot:
                 return response_text.encode("utf-8")
             except httpx.HTTPError as e:
                 logging.error(f"GPT LLM Request error: {e}")
+                return 'error'
+            except KeyError as e:
+                logging.error(f"KeyError: {e}")
                 return 'error'
 
 async def main():

@@ -21,13 +21,18 @@ class Sender:
 
         try:
             # 使用 asyncio.wait_for 添加超时处理
+            # print(type(111))
             reader, writer = await asyncio.wait_for(asyncio.open_connection(self.host, self.port,ssl = ssl_context), timeout=timeout)
+            
+
             if session:
                 package = utils.monitor_instance.restruct_session(session, package)
             writer.write(package)
             await writer.drain()
+        
             # 对读取操作也添加超时处理
             response = await asyncio.wait_for(reader.read(), timeout=timeout)
+            # print("aaa")
         except asyncio.TimeoutError:
             logging.info(f"Operation timed out after {timeout} seconds")
             return None
@@ -44,7 +49,7 @@ class Sender:
             if writer:  # 在关闭前检查writer是否存在
                 writer.close()
                 await writer.wait_closed()
-        return response.decode()
+        return response
     
    
 

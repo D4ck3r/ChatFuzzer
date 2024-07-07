@@ -34,8 +34,11 @@ async def main():
     mutator_task = asyncio.create_task(mutator.task(utils.seed_template_queue)) # mutator 
     fuzzer_task = asyncio.create_task(fuzzer.task(utils.header_send_queue, utils.content_send_queue))
 
-    await asyncio.gather(rabbit_consumer, producer_task, gpt_task, monitor_task, mutator_task, fuzzer_task)
+    # await asyncio.gather(rabbit_consumer, producer_task, gpt_task, monitor_task, mutator_task, fuzzer_task)
+    await asyncio.gather(rabbit_consumer, producer_task, monitor_task, mutator_task, fuzzer_task)
 
 if __name__ == '__main__':
+    utils.clear_folder_contents("debug")
+    utils.clear_folder_contents("fuzz/result")
     asyncio.run(main(), debug=True)
 

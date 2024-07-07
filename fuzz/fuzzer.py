@@ -2,12 +2,15 @@ import asyncio
 from utils import utils
 from sender.sender import Sender
 import logging
+import aiofiles
+import os 
+import pickle 
 
 class Fuzzer:
     def __init__(self) -> None:
         self.config = utils.global_config
-        host = self.config["Login-Information"]["host"]
-        port = int(self.config["Login-Information"]["port"])
+        host = self.config[self.config["Fuzzer"]["name"]]["host"]
+        port = int(self.config[self.config["Fuzzer"]["name"]]["port"])
         self.timeout = int(self.config["Fuzzer"]["timeout"])
         self.sender = Sender(host,port)
         self.header_send_queue = None
@@ -31,6 +34,10 @@ class Fuzzer:
         # print(response)
 
     async def process_item(self, item):
+        if utils.global_config["Fuzzer"]["model"] == "DEBUG":
+            filename = utils.calculate_md5(item)
+            async with aiofiles.open(os.path.join(utils.global_config["Fuzzer"]["debug_dir_seed"], filename), 'wb') as file:
+                await file.write(pickle.dumps(item))
         # logging.info(item)
         await self.header_fuzzer(item)
         # await self.content_fuzzer(item)

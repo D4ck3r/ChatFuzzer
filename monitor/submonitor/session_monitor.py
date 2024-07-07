@@ -3,14 +3,16 @@ from sender.sender import Sender
 import asyncio
 import re
 import logging
+import os 
 
 class SessionMonitor:
     def __init__(self) -> None:
         self.config = utils.global_config
-        self.login_package = self.config["Login-Information"]["loginfile"]
-        self.check_package = self.config["Login-Information"]["checkfile"]
-        host = self.config["Login-Information"]["host"]
-        port = int(self.config["Login-Information"]["port"])
+        # login_package array struct
+        self.login_package = [item.strip() for item in self.config[self.config["Fuzzer"]["name"]]["loginfile"].split(',')] 
+        self.check_package = self.config[self.config["Fuzzer"]["name"]]["checkfile"]
+        host = self.config[self.config["Fuzzer"]["name"]]["host"]
+        port = int(self.config[self.config["Fuzzer"]["name"]]["port"])
         self.sender = Sender(host,port)
 
     def get_package(self, filename):
@@ -42,17 +44,17 @@ class SessionMonitor:
     async def session_login(self):
         response = None
         logging.info("send login package")
-        data = self.get_package(self.login_package)
         
-        try:
-            response = await self.sender.send_http_request(data)
-        except ConnectionResetError as e:
-            logging.info(f"Connection was reset by peer - {e}")
-
-        if response:
-            utils.session = utils.monitor_instance.extract_session(response)
-            await utils.write_to_file("monitor/session.data", utils.session.decode("utf-8"))
-        # print(session)
+        for item in self.login_package:
+            data = self.get_package(item)
+            try:
+                response = await self.sender.send_http_request(data, fssl= utils.fssl)
+            except ConnectionResetError as e:
+                logging.info(f"Connection was reset by peer - {e}")
+            if response:
+                utils.session = utils.monitor_instance.extract_session(response)
+                if utils.session != None and utils.session != b'':
+                    await utils.write_to_file("monitor/session.data", utils.session)
 
     async def manage_sessions(self):
         # Assume you want to run these concurrently

@@ -26,7 +26,7 @@ class SeedTemplate:
     def extract_and_separate_fields(self, data):
         if isinstance(data, str):
             data = data.encode('utf-8')
-        pattern = re.compile(rb'\$#([^#]+)#\$')
+        pattern = re.compile(rb'\$#(.*?)#\$')
         fields = re.split(pattern, data)
         marked_fields = [[f, self.is_type(f),0] for i, f in enumerate(fields) if i % 2 != 0]
         unmarked_fields = [f for i, f in enumerate(fields) if i % 2 == 0]
@@ -78,8 +78,34 @@ class SeedTemplate:
         return updated_header
 
     def __lt__(self, other):
-            # 比较两个 SeedTemplate 实例的优先级
             return self.priority < other.priority
+    
+    def to_dict(self): 
+        # save dic to file 
+        return {
+            'header_marked_fields': self.header_marked_fields,
+            'header_unmarked_fields': self.header_unmarked_fields,
+            'content_marked_fields': self.content_marked_fields,
+            'content_unmarked_fields': self.content_unmarked_fields,
+            'label_head': self.label_head,
+            'label_content': self.label_content,
+            'priority': self.priority,
+            'id': self.id,
+            'map_id': self.map_id
+        }
+    
+    @classmethod
+    def from_dict(cls, data):
+        # load from file 
+        obj = cls(data['priority'], data['map_id'])
+        obj.header_marked_fields = data['header_marked_fields']
+        obj.header_unmarked_fields = data['header_unmarked_fields']
+        obj.content_marked_fields = data['content_marked_fields']
+        obj.content_unmarked_fields = data['content_unmarked_fields']
+        obj.label_head = data['label_head']
+        obj.label_content = data['label_content']
+        obj.id = data['id']
+        return obj
 
 if __name__ == "__main__":
     head = b"""

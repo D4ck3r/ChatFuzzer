@@ -10,7 +10,9 @@ async def consumers():
         if item is None:
             break
         # print(f'Consumed {item}')
-        hash_key,res,flag,raw_split = feature_extraction(item)
+        hash_key,res,flag,raw_split,host = feature_extraction(item)
+        if host != utils.global_config[utils.global_config["Fuzzer"]["name"]]["host"] :
+            continue
         if hash_key in utils.global_dict:
             print("exist")
         elif flag:
