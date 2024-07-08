@@ -3,4 +3,5 @@
 /.idea/
 /debug/
 /fuzz/result/
-**/__pycache__/
+__pycache__/
+tmp/
