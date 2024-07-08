@@ -7,7 +7,8 @@ from utils.priority_queue import AsyncPriorityQueue
 import uuid
 import aiofiles
 import importlib
-import os 
+import os
+from utils.terminal import RichLoggerDisplay 
 
 raw_http_queue = None
 seed_template_queue = None
@@ -26,7 +27,7 @@ session = None
 global_dict = {}
 vul_package = []
 fssl = None
-
+display = RichLoggerDisplay()
 
 def init_ssl():
     global fssl, ftype

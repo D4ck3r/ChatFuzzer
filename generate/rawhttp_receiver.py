@@ -15,7 +15,6 @@ class AsyncRabbitMQConsumer:
 
     async def on_message(self, message: IncomingMessage):
         async with message.process():
-            print(1)
             await utils.raw_http_queue.put(message.body.decode())
             # logging.info(f"Received message: {message.body.decode()}")
     async def connect(self):
@@ -37,7 +36,6 @@ class AsyncRabbitMQConsumer:
     async def start_consuming(self):
         if not self.channel:
             await self.connect()
-
         try:
             queue = await self.channel.declare_queue(self.queue_name, durable=True)
             await queue.consume(self.on_message)
