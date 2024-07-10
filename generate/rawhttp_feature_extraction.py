@@ -50,7 +50,7 @@ def feature_extraction(content):
     merge = header_one + content
     res = remove_random(merge)
     res = remove_blank(res)
-    host = extract_host(content)
+    host = extract_host(header)
     # print(res)
     return calculate_md5(res),res,flag,{"header": header, "content": content},host
 

@@ -7,7 +7,6 @@ from monitor.submonitor.session_monitor import SessionMonitor
 from monitor.monitor import Monitor
 from mutator.mutator import Mutator
 from fuzz.fuzzer import Fuzzer
-from utils.terminal import RichLoggerDisplay
 
 async def main():
     # utils.configure_logging()
@@ -30,7 +29,7 @@ async def main():
 
     # Algorithm 1
     display_task = asyncio.create_task(utils.display.display())
-    display_task1 = asyncio.create_task(utils.display.update_variables())
+    # display_task1 = asyncio.create_task(utils.display.update_variables())
     rabbit_consumer = asyncio.create_task(consumer.start_consuming())  #receive message from rabbit mq
     producer_task = asyncio.create_task(consumers()) # preduce message and  send to gpt task
     gpt_task = asyncio.create_task(task(utils.gpt_chat_queue)) #gpt task generate seed template

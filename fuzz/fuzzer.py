@@ -49,6 +49,7 @@ class Fuzzer:
             logging.info(fuzz_type + "fuzzer begain")
             item = await queue.get()
             # logging.info("Priority: %s"%(item.priority))
+            utils.display.temlates_vars["Seeds"] += 1
             await self.process_item(item)
             # await asyncio.sleep(3)
             logging.info(f"{fuzz_type} Consumer {index} processed an item")

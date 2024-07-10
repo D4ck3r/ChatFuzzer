@@ -27,7 +27,7 @@ session = None
 global_dict = {}
 vul_package = []
 fssl = None
-display = RichLoggerDisplay()
+display = None
 
 def init_ssl():
     global fssl, ftype
@@ -86,9 +86,11 @@ def generate_uuid4():
     return uuid.uuid4()
 
 def parse_config(filename):
-    global global_config 
+    global global_config, display
     global_config = configparser.ConfigParser()
     global_config.read(filename)
+    display = RichLoggerDisplay(global_config)
+    
 
 def configure_logging():
     logging.basicConfig(level=logging.DEBUG,

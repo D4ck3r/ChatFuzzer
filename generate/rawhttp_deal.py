@@ -11,7 +11,7 @@ async def consumers():
             break
         # print(f'Consumed {item}')
         hash_key,res,flag,raw_split,host = feature_extraction(item)
-        if host != utils.global_config[utils.global_config["Fuzzer"]["name"]]["host"] :
+        if utils.global_config[utils.global_config["Fuzzer"]["name"]]["host"] not in host:
             continue
         if hash_key in utils.global_dict:
             print("exist")

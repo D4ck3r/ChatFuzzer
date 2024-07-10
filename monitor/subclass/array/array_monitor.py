@@ -2,7 +2,7 @@ from monitor.interface.monitor_interface import MonitorInterface
 import logging
 import re
 
-class LinksysMonitor(MonitorInterface):
+class ArrayMonitor(MonitorInterface):
     def __init__(self) -> None:
         pass
 
@@ -12,12 +12,12 @@ class LinksysMonitor(MonitorInterface):
             logging.info("check login 302 ")
             is_redirect = True
         else:
-            is_redirect = b"401 Unauthorized" in response
+            is_redirect = b"401 - Unauthorized" in response
         return is_redirect
 
     def restruct_session(self, session, package):
         return re.sub(rb"Authorization: Basic .*", b"Authorization: Basic " + session, package)
 
     def extract_session(self, response):
-        session = "OmFkbWlu"
+        session = "YXJyYXk6YWRtaW4="
         return session.encode("utf-8")

@@ -17,14 +17,13 @@ async def generate_seed_template(item,label_head,label_content):
     seedtemplate.set_id(utils.generate_uuid4())
     seedtemplate.set_label_header(label_head)
     seedtemplate.set_label_content(label_content)
-    # print(label_head)
-    # print(label_content)
     utils.global_dict[item["hash"]]["seedtemplate"] = seedtemplate
     if utils.global_config["Fuzzer"]["model"] == "DEBUG":
         async with aiofiles.open(os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], str(seedtemplate.id)), 'wb') as file:
             await file.write(pickle.dumps(seedtemplate))
        
     await utils.seed_template_queue.put_item(seedtemplate, priority=1)
+    utils.display.temlates_vars["Seed Templates"] += 1
 
 async def process_item(item, queue):
     '''
