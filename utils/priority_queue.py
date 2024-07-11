@@ -16,6 +16,9 @@ class AsyncPriorityQueue:
         print(f'deal：{item}，priority：{priority}')
         self.queue.task_done()
         return item
+    
+    def size(self):
+        return self.queue.qsize()
 
 # 使用示例
 def main():

@@ -24,7 +24,14 @@ seed_template_link = None
 gpt_chat_queue = None
 global_config = None
 session = None
-global_dict = {}
+
+rawhttp_dict = {}
+
+tp_dict = {}
+root_tp_dict = {}
+leaf_tp_dict = {}
+# tp_processing_count = 0
+
 vul_package = []
 fssl = None
 display = None

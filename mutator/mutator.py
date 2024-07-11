@@ -8,6 +8,8 @@ class Mutator:
     def __init__(self):
         self.rad = Radamsa()
         self.ms = mutation_strategy.MutationStrategy()
+        self.lock = asyncio.Lock()
+
 
     async def header_mutator(self, data):
         logging.info("mutator header: ")
@@ -45,10 +47,15 @@ class Mutator:
 
     async def process_item(self, item):
         # logging.info(item)
+        async with self.lock:
+            utils.display.temlates_vars["Templates Processing"] += 1
         await self.content_mutator(item)
         await self.header_mutator(item)
         print(item)
         logging.info("mutator process_item")
+
+        async with self.lock:
+            utils.display.temlates_vars["Templates Processing"] -= 1
 
     async def consume(self, queue, index):
         while True:
@@ -65,6 +72,7 @@ class Mutator:
             await asyncio.sleep(3)
             logging.error("Mutator testing")
 
+# queue <- seed_template_queue
     async def task(self, queue):
         consumers = [asyncio.create_task(self.consume(queue, index)) for index in range(3)]
         # test = [asyncio.create_task(self.test()) for _ in range(5)]

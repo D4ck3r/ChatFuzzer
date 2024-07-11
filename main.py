@@ -7,6 +7,7 @@ from monitor.submonitor.session_monitor import SessionMonitor
 from monitor.monitor import Monitor
 from mutator.mutator import Mutator
 from fuzz.fuzzer import Fuzzer
+from scheduling.seed_scheduling import SeedScheduling
 
 async def main():
     # utils.configure_logging()
@@ -21,10 +22,10 @@ async def main():
     await utils.init_vul_package_queue()
     consumer = AsyncRabbitMQConsumer()
     monitor = Monitor()
+    scheduling = SeedScheduling()
     mutator = Mutator()
     fuzzer = Fuzzer()
     
-
     await consumer.connect()
 
     # Algorithm 1
@@ -36,10 +37,11 @@ async def main():
     
     # Algorithm 2
     monitor_task = asyncio.create_task(monitor.task(utils.vul_package_queue))
+    scheduling_task = asyncio.create_task(scheduling.task(utils.seed_template_queue))
     mutator_task = asyncio.create_task(mutator.task(utils.seed_template_queue)) # mutator 
     fuzzer_task = asyncio.create_task(fuzzer.task(utils.header_send_queue, utils.content_send_queue))
 
-    await asyncio.gather(display_task, rabbit_consumer, producer_task, gpt_task, monitor_task, mutator_task, fuzzer_task)
+    await asyncio.gather(display_task, rabbit_consumer, producer_task, gpt_task, monitor_task, scheduling_task, mutator_task, fuzzer_task)
     # await asyncio.gather(rabbit_consumer, producer_task, monitor_task, mutator_task, fuzzer_task)
 
 if __name__ == '__main__':

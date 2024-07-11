@@ -1,4 +1,5 @@
 import re
+import random
 
 class SeedTemplate:
     def __init__(self, priority, map_id):
@@ -13,6 +14,9 @@ class SeedTemplate:
         self.priority = priority
         self.id = None
         self.map_id = map_id
+        self.success = 100
+        self.failed = 100
+        self.response = []
 
     def is_type(self, s):
         if re.match(rb'^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$', s.strip()):
@@ -106,6 +110,9 @@ class SeedTemplate:
         obj.label_content = data['label_content']
         obj.id = data['id']
         return obj
+    
+    def sample_beta(self):
+        return random.betavariate(self.success + 1, self.failed + 1)
 
 if __name__ == "__main__":
     head = b"""

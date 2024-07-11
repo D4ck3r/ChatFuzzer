@@ -5,6 +5,7 @@ import os
 import httpx
 import binascii
 import logging
+from utils import utils
 
 class OpenAIChatbot:
     def __init__(self, config_file='config.ini', chat_type="header"):
@@ -62,6 +63,7 @@ class OpenAIChatbot:
             return ''
 
     async def chat(self, user_input):
+        utils.display.gpt_vars["LLM request packages"] += 1
         self.tmp_messages = self.messages.copy()
         self.tmp_messages.append({"role": "user", "content": user_input})
         data = {

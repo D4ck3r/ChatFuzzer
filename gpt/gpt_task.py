@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from utils import utils
 import random
 import time
-from mutator.seed_template import SeedTemplate
+from mutator.structure.seed_template import SeedTemplate
 from gpt.gpt_request import OpenAIChatbot
 import os 
 import pickle
@@ -17,12 +17,13 @@ async def generate_seed_template(item,label_head,label_content):
     seedtemplate.set_id(utils.generate_uuid4())
     seedtemplate.set_label_header(label_head)
     seedtemplate.set_label_content(label_content)
-    utils.global_dict[item["hash"]]["seedtemplate"] = seedtemplate
+    utils.root_tp_dict[item["hash"]] = seedtemplate
+    utils.tp_dict[item["hash"]] = seedtemplate
     if utils.global_config["Fuzzer"]["model"] == "DEBUG":
         async with aiofiles.open(os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], str(seedtemplate.id)), 'wb') as file:
             await file.write(pickle.dumps(seedtemplate))
        
-    await utils.seed_template_queue.put_item(seedtemplate, priority=1)
+    # await utils.seed_template_queue.put_item(seedtemplate, priority=1)
     utils.display.temlates_vars["Seed Templates"] += 1
 
 async def process_item(item, queue):
@@ -46,11 +47,11 @@ async def process_item(item, queue):
 
     if label_head == "error" or label_content == "error":
         await queue.put(item)
-        # if item['hash'] in utils.global_dict:
-        #     utils.global_dict.pop(item['hash'])
+        # if item['hash'] in utils.rawhttp_dict:
+        #     utils.rawhttp_dict.pop(item['hash'])
     else:
         await generate_seed_template(item, label_head, label_content)
-        print(item["hash"])
+        # print(item["hash"])
     # await asyncio.sleep(40)
 
 async def consume(queue, index):

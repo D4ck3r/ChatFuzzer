@@ -18,16 +18,18 @@ class RichLoggerDisplay:
         product = self.global_config[self.global_config["Fuzzer"]["name"]]
         self.temlates_vars = {
             "Seed Templates": 0,
+            "Templates Processing": 0,
             "Seeds": 0,
             "Root ST": 0,
             "Leaf ST": 0,
             "Thompson Sampling Round": 0,
+
         }
 
         self.info_vars = {
             "IoT Product": self.global_config["Fuzzer"]["name"] + product["version"],
             "Target": product["type"]+"://"+product["host"]+":"+product["port"],
-            "Request From Web": 0,
+            "Web Requests": 0,
             "Login Status": "Login",
             "Run Time": 0,
         }
@@ -144,10 +146,11 @@ class RichLoggerDisplay:
                 # layout = self.create_layout()
                 layout["left_top_table"].update(self.render_introduction_table())
                 layout["left_mid_table"].update(self.render_template_table())
+                layout["right_top_table"].update(self.render_gpt_table())
+                layout["right_mid_table"].update(self.render_result_table())
                 # live.update(layout)
                 await self.update_runtime()
                 await asyncio.sleep(0.001)
-
 
     def create_layout(self):
         layout = Layout()

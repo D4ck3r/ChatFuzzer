@@ -23,7 +23,7 @@ class Fuzzer:
         response = None
         is_redirect = None
         try:
-            response = await self.sender.send_http_request(data, utils.session, timeout = self.timeout, fssl= utils.fssl)
+            response = await self.sender.send_http_request(data, utils.session, timeout = self.timeout, fssl = utils.fssl)
         except ConnectionResetError as e:
             logging.info(f"Connection was reset by peer - {e}")
             utils.vul_package.append(data)
@@ -40,8 +40,6 @@ class Fuzzer:
                 await file.write(pickle.dumps(item))
         # logging.info(item)
         await self.header_fuzzer(item)
-        # await self.content_fuzzer(item)
-        # print(item)
         logging.info("fuzzer process_item")
 
     async def consume(self, queue, index, fuzz_type):
