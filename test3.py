@@ -1,39 +1,24 @@
-import time
-from rich.progress import Progress
+import git
 
-def check_database():
-    time.sleep(1)  # 模拟数据库检查延时
-    return "数据库连接成功"
+def get_git_info(repo_path='.'):
+    repo = git.Repo(repo_path, search_parent_directories=True)
+    branch = repo.active_branch.name
+    last_commit = repo.head.commit
+    return {
+        'branch': branch,
+        'last_commit': {
+            'hexsha': last_commit.hexsha,
+            'author': last_commit.author.name,
+            'summary': last_commit.summary,
+            'date': last_commit.authored_datetime
+        }
+    }
 
-def check_api_service():
-    time.sleep(2)  # 模拟API服务检查延时
-    return "API服务可用"
-
-def check_file_system():
-    time.sleep(1.5)  # 模拟文件系统检查延时
-    return "文件系统正常"
-
-def main():
-    tasks = [
-        (check_database, "检查数据库"),
-        (check_api_service, "检查API服务"),
-        (check_file_system, "检查文件系统")
-    ]
-
-    results = []
-
-    with Progress() as progress:
-        task_progress = progress.add_task("[cyan]正在进行系统检查...", total=len(tasks))
-
-        for task, description in tasks:
-            result = task()  # 直接调用同步函数
-            progress.console.print(f"{description} [bold green]完成[/]: {result}")
-            progress.update(task_progress, advance=1)
-            results.append(result)
-
-        progress.console.print("[bold green]所有系统检查完成！[/]")
-        print("检查结果：", results)
-
-# 运行主函数
-if __name__ == "__main__":
-    main()
+# 使用当前目录作为仓库路径
+git_info = get_git_info()
+print("Current Branch:", git_info['branch'])
+print("Last Commit:")
+print("  SHA:", git_info['last_commit']['hexsha'])
+print("  Author:", git_info['last_commit']['author'])
+print("  Summary:", git_info['last_commit']['summary'])
+print("  Date:", git_info['last_commit']['date'])

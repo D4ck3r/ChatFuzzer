@@ -15,6 +15,7 @@ class Fuzzer:
         self.sender = Sender(host,port)
         self.header_send_queue = None
         self.content_send_queue = None
+        self.send_seed_lock = asyncio.Lock()
     
     def content_fuzzer(self, data):
         self.sender.send_http_request()
@@ -24,6 +25,8 @@ class Fuzzer:
         is_redirect = None
         try:
             response = await self.sender.send_http_request(data, utils.session, timeout = self.timeout, fssl = utils.fssl)
+            async with self.send_seed_lock:
+                utils.display.send_seed_num += 1
         except ConnectionResetError as e:
             logging.info(f"Connection was reset by peer - {e}")
             utils.vul_package.append(data)
@@ -47,7 +50,6 @@ class Fuzzer:
             logging.info(fuzz_type + "fuzzer begain")
             item = await queue.get()
             # logging.info("Priority: %s"%(item.priority))
-            utils.display.temlates_vars["Seeds"] += 1
             await self.process_item(item)
             # await asyncio.sleep(3)
             logging.info(f"{fuzz_type} Consumer {index} processed an item")
@@ -55,7 +57,7 @@ class Fuzzer:
     async def task(self, header_send_queue, content_send_queue):
         self.header_send_queue = header_send_queue
         self.content_send_queue = content_send_queue
-        header_consumers = [asyncio.create_task(self.consume(header_send_queue, index, "header")) for index in range(3)]
-        content_consumers = [asyncio.create_task(self.consume(content_send_queue, index, "content")) for index in range(3)]
+        header_consumers = [asyncio.create_task(self.consume(header_send_queue, index, "header")) for index in range(100)]
+        content_consumers = [asyncio.create_task(self.consume(content_send_queue, index, "content")) for index in range(100)]
         # test = [asyncio.create_task(self.test()) for _ in range(5)]
         await asyncio.gather(*header_consumers, *content_consumers) 

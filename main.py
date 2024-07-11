@@ -32,7 +32,7 @@ async def main():
     await consumer.connect()
 
     # Algorithm 1
-    display_task = asyncio.create_task(utils.display.display())
+    display_task = asyncio.create_task(utils.display.run())
     # display_task1 = asyncio.create_task(utils.display.update_variables())
     rabbit_consumer = asyncio.create_task(consumer.start_consuming())  #receive message from rabbit mq
     producer_task = asyncio.create_task(consumers()) # preduce message and  send to gpt task

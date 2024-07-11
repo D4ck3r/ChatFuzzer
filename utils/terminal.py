@@ -9,6 +9,7 @@ from rich.panel import Panel
 from rich.align import Align
 from rich.box import ROUNDED
 from datetime import datetime, timedelta
+import git
 
 class RichLoggerDisplay:
     def __init__(self, global_config):
@@ -16,9 +17,11 @@ class RichLoggerDisplay:
         self.start_time = datetime.now()
         self.console = Console()
         product = self.global_config[self.global_config["Fuzzer"]["name"]]
+        self.seed_num = 0
+        self.send_seed_num = 0
         self.temlates_vars = {
             "Seed Templates": 0,
-            "Templates Processing": 0,
+            "Templates Processed": 0,
             "Seeds": 0,
             "Root ST": 0,
             "Leaf ST": 0,
@@ -72,11 +75,8 @@ class RichLoggerDisplay:
 
     async def update_variables(self):
         while True:
-            self.variables["SeedTemplates"] += 1
-            self.variables["Seeds"] += 2
-            self.variables["Variable3"] += 3
-            # self.logger.info(f"[bold green]Updated variables:[/] {self.variables}")
-            await asyncio.sleep(1)  # 每秒更新一次
+            self.temlates_vars["Seeds"] = str(self.send_seed_num)+"/"+str(self.seed_num)
+            await asyncio.sleep(0.05)  # 每秒更新一次
 
     def render_introduction_table(self):
         # Create a table with a title and a rounded box, but without shown headers
@@ -139,7 +139,7 @@ class RichLoggerDisplay:
     
     async def display(self):
         layout = self.create_layout()
-       
+        # await self.update_variables()
         with Live(layout, refresh_per_second=1, console=self.console) as live:
             while True:
                 # 更新 layout 来防止重叠
@@ -152,13 +152,20 @@ class RichLoggerDisplay:
                 await self.update_runtime()
                 await asyncio.sleep(0.001)
 
+    def project_info(self, repo_path = '.'):
+        repo = git.Repo(repo_path, search_parent_directories=True)
+        branch = repo.active_branch.name
+        last_commit = repo.head.commit
+        date_time = last_commit.authored_datetime
+        return f"[bold dark_red]Git branch[/] [bold blue]{branch}@{str(last_commit)}[/] , [bold dark_red]Last Update Time[/] [bold blue]{date_time}[/]"
+
     def create_layout(self):
         layout = Layout()
         # 顶部布局
         layout.split_column(
             Layout(Panel(Align.center(self.global_config["Panel"]["panel_name"])), name="header", size=3),
             Layout(name="main", ratio=1),
-            Layout(name="footer", size=3),
+            Layout(Panel(Align.center(self.project_info())), name="footer", size=3),
         )
 
         # 主布局
@@ -167,7 +174,11 @@ class RichLoggerDisplay:
             Layout(name="right"),
         )
 
-        # 添加表格到左侧布局
+        # layout["footer"].split_row(
+        #     Layout(name="left", ratio=1),
+        #     Layout(name="right"),
+        # )
+        # 添加表格到左侧布局 
         introduction_table = self.render_introduction_table()
         another_table = self.render_template_table()
         

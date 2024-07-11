@@ -77,20 +77,26 @@ class OpenAIChatbot:
         async with httpx.AsyncClient(proxies=self.proxies, timeout=10) as client:
             try:
                 response = await client.post(self.endpoint, headers=self.headers, json=data)
-                if response.status_code == 429:
+                if response.status_code != 200:
+                    logging.error(f"Failed to get valid response: Status Code {response.status_code}")
                     return 'error'
-                response_text = response.json()['choices'][0]['message']['content']
-                # print(response.content)
-                response_text = response_text.strip()
-                if '\r\n' not in response_text:
-                    response_text = response_text.replace('\n', '\r\n')
-                response_text = response_text + '\r\n\r\n'
-                return response_text.encode("utf-8")
+                
+                try:
+                    response_data = response.json()
+                    response_text = response_data['choices'][0]['message']['content']
+                    response_text = response_text.strip()
+                    if '\r\n' not in response_text:
+                        response_text = response_text.replace('\n', '\r\n')
+                    response_text = response_text + '\r\n\r\n'
+                    return response_text.encode("utf-8")
+                except KeyError as e:
+                    logging.error(f"KeyError: {e}")
+                    return 'error'
+                except json.JSONDecodeError as e:
+                    logging.error(f"JSON decode error: {e}")
+                    return 'error'
             except httpx.HTTPError as e:
                 logging.error(f"GPT LLM Request error: {e}")
-                return 'error'
-            except KeyError as e:
-                logging.error(f"KeyError: {e}")
                 return 'error'
 
 async def main():

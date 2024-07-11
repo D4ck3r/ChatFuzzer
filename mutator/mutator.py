@@ -8,7 +8,10 @@ class Mutator:
     def __init__(self):
         self.rad = Radamsa()
         self.ms = mutation_strategy.MutationStrategy()
-        self.lock = asyncio.Lock()
+        self.templated_lock = asyncio.Lock()
+        self.seed_lock = asyncio.Lock()
+
+
 
 
     async def header_mutator(self, data):
@@ -35,6 +38,8 @@ class Mutator:
             fields_array.content_marked_fields[index][0] = item
             package = fields_array.reconstruct_packet()
             await utils.content_send_queue.put(package)
+            async with self.seed_lock:
+                utils.display.seed_num += 1
             fields_array.content_marked_fields[index][0] = recover
         
     async def header_reconstruct(self, fields_array, index, res):
@@ -43,19 +48,20 @@ class Mutator:
             fields_array.header_marked_fields[index][0] = item
             package = fields_array.reconstruct_packet()
             await utils.header_send_queue.put(package)
+            async with self.seed_lock:
+                utils.display.seed_num += 1
             fields_array.header_marked_fields[index][0] = recover
 
     async def process_item(self, item):
         # logging.info(item)
-        async with self.lock:
-            utils.display.temlates_vars["Templates Processing"] += 1
+        async with self.templated_lock:
+            utils.display.temlates_vars["Templates Processed"] += 1
         await self.content_mutator(item)
         await self.header_mutator(item)
         # print(item)
         logging.info("mutator process_item")
 
-        async with self.lock:
-            utils.display.temlates_vars["Templates Processing"] -= 1
+      
 
     async def consume(self, queue, index):
         while True:
