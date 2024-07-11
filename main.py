@@ -8,6 +8,7 @@ from monitor.monitor import Monitor
 from mutator.mutator import Mutator
 from fuzz.fuzzer import Fuzzer
 from scheduling.seed_scheduling import SeedScheduling
+from utils.system_check import SystemChecker
 
 async def main():
     # utils.configure_logging()
@@ -25,6 +26,8 @@ async def main():
     scheduling = SeedScheduling()
     mutator = Mutator()
     fuzzer = Fuzzer()
+    checker = SystemChecker()
+    results = checker.run_checks()
     
     await consumer.connect()
 

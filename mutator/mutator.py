@@ -51,7 +51,7 @@ class Mutator:
             utils.display.temlates_vars["Templates Processing"] += 1
         await self.content_mutator(item)
         await self.header_mutator(item)
-        print(item)
+        # print(item)
         logging.info("mutator process_item")
 
         async with self.lock:

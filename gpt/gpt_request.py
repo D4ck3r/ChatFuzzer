@@ -56,10 +56,10 @@ class OpenAIChatbot:
                 content = file.read()  # Reading the file content as bytes
                 return content.decode('utf-8')  # Decoding the bytes to string using utf-8 encoding
         except FileNotFoundError:  # Catching the case where the file does not exist
-            print(f"File {filename} not found.")
+            logging.error(f"File {filename} not found.")
             return ''
         except Exception as e:  # Catching other potential exceptions
-            print(f"An error occurred while reading the file: {e}")
+            logging.error(f"An error occurred while reading the file: {e}")
             return ''
 
     async def chat(self, user_input):

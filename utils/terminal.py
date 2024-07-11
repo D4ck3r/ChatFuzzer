@@ -176,7 +176,7 @@ class RichLoggerDisplay:
         # 左侧布局的拆分，将两个表格垂直排列
         layout["left"].split_column(
             Layout(introduction_table, ratio=1, name="left_top_table"),
-            Layout(another_table, ratio=1, name="left_mid_table"),
+            Layout(another_table, ratio=2, name="left_mid_table"),
         )
 
         layout["right"].split_column(
