@@ -24,7 +24,7 @@ async def generate_seed_template(item,label_head,label_content):
             await file.write(pickle.dumps(seedtemplate))
        
     # await utils.seed_template_queue.put_item(seedtemplate, priority=1)
-    utils.display.temlates_vars["Seed Templates"] += 1
+    utils.display.template_num += 1
 
 async def process_item(item, queue):
     '''

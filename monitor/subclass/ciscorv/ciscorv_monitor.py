@@ -13,7 +13,6 @@ class CiscoRVMonitor(MonitorInterface):
         return is_redirect
     
     def restruct_session(self, session, package):
-        # 使用正则表达式匹配并替换 session_id
         pattern = rb"(session_id=)[a-f0-9]{32}"
         replacement = session
         modified_data, count = re.subn(pattern, replacement, package, 1)

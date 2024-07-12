@@ -19,6 +19,8 @@ class RichLoggerDisplay:
         product = self.global_config[self.global_config["Fuzzer"]["name"]]
         self.seed_num = 0
         self.send_seed_num = 0
+        self.unique_template_num = 0
+        self.template_num = 0
         self.temlates_vars = {
             "Seed Templates": 0,
             "Templates Processed": 0,
@@ -76,6 +78,7 @@ class RichLoggerDisplay:
     async def update_variables(self):
         while True:
             self.temlates_vars["Seeds"] = str(self.send_seed_num)+"/"+str(self.seed_num)
+            self.temlates_vars["Seed Templates"] = str(self.unique_template_num) + "/" + str(self.template_num)
             await asyncio.sleep(0.05)  # 每秒更新一次
 
     def render_introduction_table(self):

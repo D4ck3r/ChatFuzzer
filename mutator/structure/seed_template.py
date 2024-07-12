@@ -9,21 +9,24 @@ class SeedTemplate:
         self.content_unmarked_fields = []
         # self.send_header = None
         # self.send_content = None
+        self.id = None
+        self.parent_id = None
+        self.child_dict = {}
         self.label_head = ''
         self.label_content = ''
         self.priority = priority
-        self.id = None
         self.map_id = map_id
         self.success = 100
         self.failed = 100
         self.response = []
+        self.times = 0
 
     def is_type(self, s):
         if re.match(rb'^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$', s.strip()):
             return "num"
         else:
             return "str"
-        
+
     def set_id(self, id):
         self.id = id
         
@@ -52,15 +55,12 @@ class SeedTemplate:
 
     def reconstruct_packet(self):
         reconstructed_packet = b""
-        # 处理头部信息
         for unmarked, (marked, type_, num_) in zip(self.header_unmarked_fields, self.header_marked_fields):
             reconstructed_packet += unmarked + marked
         if len(self.header_unmarked_fields) > len(self.header_marked_fields):
             reconstructed_packet += self.header_unmarked_fields[-1]
 
         # reconstructed_packet += b"\r\n"
-        # 处理内容信息
-
         content_packet = b""
         for unmarked, (marked, type_, num_) in zip(self.content_unmarked_fields, self.content_marked_fields):
             content_packet += unmarked + marked

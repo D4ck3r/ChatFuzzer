@@ -37,7 +37,7 @@
   },
   {
     "role": "user",
-    "content": "Please answer strictly based on my requirements and examples!!! Do not mark the entire data in json xml and other formats, only mark the values in it.!!!"
+    "content": "Please answer strictly based on my requirements and examples!!! Do not mark the entire data in json xml and other formats, only mark the values in it.!!! The output must strictly adhere to the given example, containing no information beyond the data package.including ``` and other sentence"
   },
   {
     "role": "assistant",

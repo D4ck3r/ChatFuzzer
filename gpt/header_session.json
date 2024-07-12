@@ -13,10 +13,18 @@
   },
   {
     "role": "user",
-    "content": "POST /agent/login?t=1707901591745&t=%2faaaa%2f&action={\"second\":\"test\",\"big\":{\"1\":1}}&xmldata=<methodCall><methodName>login</methodName><params>username</params></methodCall>&b=%7b%22%6e%61%6d%65%22%3a%22%61%64%6d%69%6e%22%2c%22%70%61%73%73%77%6f%72%64%22%3a%22%31%32%33%34%35%36%22%7d&data=%3Cuser%3E%3Cname%3EJohn%3C%2Fname%3E%3Cage%3E30%3C%2Fage%3E%3C%2Fuser%3E HTTP/1.1\r\nHost: 192.168.0.107\r\nConnection: keep-alive\r\nContent-Length: 416\r\nCookie: Jession=asdfasdfsadf; php=asdfasdf\r\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\r\nAccept-Encoding: gzip, deflate\r\n\r\n"
+    "content": "POST /agent/login?t=1707901591745&t=%2faaaa%2f&action={\"second\":\"test\",\"big\":{\"1\":1}}&xmldata=<methodCall><methodName>login</methodName><params>username</params></methodCall>&b=%7b%22%6e%61%6d%65%22%3a%22%61%64%6d%69%6e%22%2c%22%70%61%73%73%77%6f%72%64%22%3a%22%31%32%33%34%35%36%22%7d&data=%3Cuser%3E%3Cname%3EJohn%3C%2Fname%3E%3Cage%3E30%3C%2Fage%3E%3C%2Fuser%3E&test=aaa:bbb&data=aaa|bbb&c=aaa-bbb HTTP/1.1\r\nHost: example.com\r\nConnection: keep-alive\r\nContent-Length: 416\r\nCookie: Jession=asdfasdfsadf; php=asdfasdf\r\nAuthorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\r\nAccept-Encoding: gzip, deflate\r\n\r\n"
   },
   {
     "role": "assistant",
-    "content": "POST /agent/login?t=$#1707901591745#$&t=$#%2faaaa%2f#$&action={\"second\":\"$#test#$\",\"big\":{\"1\":$#1#$}}&xmldata=<methodCall><methodName>$#login#$</methodName><params>$#username#$</params></methodCall>&b=%7b%22%6e%61%6d%65%22%3a%22$#admin#%24%22%2c%22%70%61%73%73%77%6f%72%64%22%3a%22$#123456#$%22%7d&data=%3Cuser%3E%3Cname%3E$#John#$%3C%2Fname%3E%3Cage%3E$#30#$%3C%2Fage%3E%3C%2Fuser%3E HTTP/1.1\r\nHost: 192.168.0.107\r\nConnection: keep-alive\r\nContent-Length: 416\r\nCookie: Jession=$#asdfasdfsadf#$; php=$#asdfasdf#$\r\nAuthorization: Basic $#QWxhZGRpbjpvcGVuIHNlc2FtZQ==#$\r\nAccept-Encoding: gzip, deflate\r\n\r\n"
+    "content": "POST /agent/login?t=$#1707901591745#$&t=$#%2faaaa%2f#$&action={\"second\":\"$#test#$\",\"big\":{\"1\":$#1#$}}&xmldata=<methodCall><methodName>$#login#$</methodName><params>$#username#$</params></methodCall>&b=%7b%22%6e%61%6d%65%22%3a%22$#admin#%24%22%2c%22%70%61%73%73%77%6f%72%64%22%3a%22$#123456#$%22%7d&data=%3Cuser%3E%3Cname%3E$#John#$%3C%2Fname%3E%3Cage%3E$#30#$%3C%2Fage%3E%3C%2Fuser%3E&test=$#aaa#$:$#bbb#$&data=$#aaa#$|$#bbb#$&c=$#aaa#$-$#bbb#$ HTTP/1.1\r\nHost: example.com\r\nConnection: keep-alive\r\nContent-Length: 416\r\nCookie: Jession=$#asdfasdfsadf#$; php=$#asdfasdf#$\r\nAuthorization: Basic $#QWxhZGRpbjpvcGVuIHNlc2FtZQ==#$\r\nAccept-Encoding: gzip, deflate\r\n\r\n"
+  },
+  {
+    "role": "user",
+    "content": "Please answer strictly based on my requirements and examples, Don’t have redundant answers!!! Do not mark the entire data in json xml and other formats, only mark the values in it, and requires recursive parsing processing!!! The output must strictly adhere to the given example, containing no information beyond the data package.Don't include ```"
+  },
+  {
+    "role": "assistant",
+    "content": "ok , please input "
   }
 ]
