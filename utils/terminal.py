@@ -10,17 +10,19 @@ from rich.align import Align
 from rich.box import ROUNDED
 from datetime import datetime, timedelta
 import git
+import psutil
 
 class RichLoggerDisplay:
     def __init__(self, global_config):
         self.global_config = global_config
         self.start_time = datetime.now()
         self.console = Console()
-        product = self.global_config[self.global_config["Fuzzer"]["name"]]
+        self.product = self.global_config[self.global_config["Fuzzer"]["name"]]
         self.seed_num = 0
         self.send_seed_num = 0
         self.unique_template_num = 0
         self.template_num = 0
+        self.seed_response_num = 0
         self.temlates_vars = {
             "Seed Templates": 0,
             "Templates Processed": 0,
@@ -28,12 +30,13 @@ class RichLoggerDisplay:
             "Root ST": 0,
             "Leaf ST": 0,
             "Thompson Sampling Round": 0,
+            "Fuzz Connection": 0
 
         }
 
         self.info_vars = {
-            "IoT Product": self.global_config["Fuzzer"]["name"] + product["version"],
-            "Target": product["type"]+"://"+product["host"]+":"+product["port"],
+            "IoT Product": self.global_config["Fuzzer"]["name"] + self.product["version"],
+            "Target": self.product["type"]+"://"+self.product["host"]+":"+self.product["port"],
             "Web Requests": 0,
             "Login Status": "Login",
             "Run Time": 0,
@@ -75,11 +78,22 @@ class RichLoggerDisplay:
         self.logger = logging.getLogger('rich_logger')
         self.logger.info("[bold magenta]Logging initialized[/]")
 
+    async def count_connections(self, port, ip_address):
+        count = 0
+        connections = psutil.net_connections(kind='inet')
+        for conn in connections:
+            if (conn.status == 'ESTABLISHED' and 
+                conn.raddr.port == int(port) and 
+                conn.raddr.ip == ip_address):
+                count += 1
+        return count
+    
     async def update_variables(self):
         while True:
-            self.temlates_vars["Seeds"] = str(self.send_seed_num)+"/"+str(self.seed_num)
-            self.temlates_vars["Seed Templates"] = str(self.unique_template_num) + "/" + str(self.template_num)
-            await asyncio.sleep(0.05)  # 每秒更新一次
+            self.temlates_vars["Seeds"] = str(self.send_seed_num)+"/"+str(self.seed_num)+ f" ({self.seed_response_num})"
+            self.temlates_vars["Seed Templates"] = str(self.unique_template_num) + "/" + str(self.template_num) 
+            self.temlates_vars["Fuzz Connection"] = await self.count_connections(self.product["port"], self.product["host"])
+            await asyncio.sleep(0.05)
 
     def render_introduction_table(self):
         # Create a table with a title and a rounded box, but without shown headers

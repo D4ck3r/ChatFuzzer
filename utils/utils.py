@@ -2,6 +2,7 @@ import logging
 import hashlib
 import asyncio
 import configparser
+from mutator.structure.seed_template import SeedTemplate
 from utils.linked_node import AsyncCircularLinkedList
 from utils.priority_queue import AsyncPriorityQueue
 import uuid
@@ -136,3 +137,14 @@ def clear_folder_contents(folder_path):
                     os.unlink(file_path)
                 except Exception as e:
                     print(f'Failed to delete {file_path}. Reason: {e}')
+
+async def load_templates(directory):
+    templates = []
+    # 列出目录下所有的.pkl文件
+    for filename in os.listdir(directory):
+        if filename.endswith('.pkl'):
+            full_path = os.path.join(directory, filename)
+            # 异步加载每个文件
+            template = await SeedTemplate.load_from_file(full_path)
+            templates.append(template)
+    return templates

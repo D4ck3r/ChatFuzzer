@@ -1,12 +1,16 @@
 import re
 import random
+import aiofiles
+import pickle
 
 class SeedTemplate:
     def __init__(self, priority, map_id):
         self.header_marked_fields = []
         self.header_unmarked_fields = []
+        self.header_mutate_array = []
         self.content_marked_fields = []
         self.content_unmarked_fields = []
+        self.content_mutate_array = []
         # self.send_header = None
         # self.send_content = None
         self.id = None
@@ -46,6 +50,12 @@ class SeedTemplate:
     def set_label_content(self, label_content):
         self.label_content = label_content
         self.content_marked_fields, self.content_unmarked_fields = self.extract_and_separate_fields(label_content)
+    
+    def set_header_mutate_array(self):
+        self.header_mutate_array = [ item for item in range(len(self.header_marked_fields))]
+
+    def set_content_mutate_array(self):
+        self.content_mutate_array = [ item for item in range(len(self.content_marked_fields))]
 
     # def set_send_header(self, send_header):
     #     self.send_header = send_header
@@ -84,32 +94,14 @@ class SeedTemplate:
     def __lt__(self, other):
             return self.priority < other.priority
     
-    def to_dict(self): 
-        # save dic to file 
-        return {
-            'header_marked_fields': self.header_marked_fields,
-            'header_unmarked_fields': self.header_unmarked_fields,
-            'content_marked_fields': self.content_marked_fields,
-            'content_unmarked_fields': self.content_unmarked_fields,
-            'label_head': self.label_head,
-            'label_content': self.label_content,
-            'priority': self.priority,
-            'id': self.id,
-            'map_id': self.map_id
-        }
-    
-    @classmethod
-    def from_dict(cls, data):
-        # load from file 
-        obj = cls(data['priority'], data['map_id'])
-        obj.header_marked_fields = data['header_marked_fields']
-        obj.header_unmarked_fields = data['header_unmarked_fields']
-        obj.content_marked_fields = data['content_marked_fields']
-        obj.content_unmarked_fields = data['content_unmarked_fields']
-        obj.label_head = data['label_head']
-        obj.label_content = data['label_content']
-        obj.id = data['id']
-        return obj
+    async def save_to_file(self, filename):
+        async with aiofiles.open(filename, 'wb') as output_file:
+            await output_file.write(pickle.dumps(self))
+
+    @staticmethod
+    def load_from_file(filename):
+        with open(filename, 'rb') as input_file:
+            return pickle.load(input_file)
     
     def sample_beta(self):
         return random.betavariate(self.success + 1, self.failed + 1)

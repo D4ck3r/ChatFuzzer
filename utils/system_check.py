@@ -1,12 +1,16 @@
 import time
+import os 
 from rich.progress import Progress
+from mutator.structure.seed_template import SeedTemplate
+from utils import utils
 
 class SystemChecker:
     def __init__(self):
         self.tasks = [
             (self.check_rabbitmq, "Check RabbitMQ Connect"),
             (self.check_gpt_api, "Check GPT API"),
-            (self.check_file_system, "Check File System")
+            (self.check_file_system, "Check File System"),
+            (self.check_template_dir, "Check & Load Seed Template DIR")
         ]
 
     def check_rabbitmq(self):
@@ -20,6 +24,15 @@ class SystemChecker:
     def check_file_system(self):
         time.sleep(1.5)  # 模拟文件系统检查延时
         return "File System Writable"
+
+    def check_template_dir(self):
+        # templates = []
+        for filename in os.listdir(utils.global_config["Fuzzer"]["debug_dir_template"]):
+            full_path = os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], filename)
+            template = SeedTemplate.load_from_file(full_path)
+            utils.root_tp_dict[template.map_id] = template
+            utils.display.template_num += 1
+        return "Seed Template Load Success"
 
     def run_checks(self):
         results = []

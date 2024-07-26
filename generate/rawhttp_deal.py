@@ -14,11 +14,12 @@ async def consumers():
         if utils.global_config[utils.global_config["Fuzzer"]["name"]]["host"] not in host:
             continue
         if hash_key in utils.rawhttp_dict:
-            print("exist")
+            # print("exist")
+            pass
         elif flag:
             pass
         else:
-            print("add")
+            # print("add")
             utils.rawhttp_dict[hash_key] = {"rawhttp":item,"feature_content":res,"head_content":raw_split,"hash":hash_key}
             await utils.gpt_chat_queue.put(utils.rawhttp_dict[hash_key])
         utils.raw_http_queue.task_done()

@@ -5,3 +5,5 @@ class Seed():
         self.seed_template_dict = None
         self.template_key = None
         self.package = None
+        self.mutate_part = None
+        self.index = None

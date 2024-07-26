@@ -32,7 +32,7 @@ class SessionMonitor:
         while True:
             await asyncio.sleep(3)  # Non-blocking sleep
             try:
-                response = await self.sender.send_http_request(data, utils.session, fssl= utils.fssl)
+                response = await self.sender.send_http_request(data, utils.session, fssl= utils.fssl, stype="monitor")
             except ConnectionResetError as e:
                 logging.info(f"Connection was reset by peer - {e}")
 
@@ -48,7 +48,7 @@ class SessionMonitor:
         for item in self.login_package:
             data = self.get_package(item)
             try:
-                response = await self.sender.send_http_request(data, fssl= utils.fssl)
+                response = await self.sender.send_http_request(data, fssl= utils.fssl, stype="monitor")
             except ConnectionResetError as e:
                 logging.info(f"Connection was reset by peer - {e}")
             if response:

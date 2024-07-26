@@ -1,24 +1,14 @@
-import git
+import psutil
 
-def get_git_info(repo_path='.'):
-    repo = git.Repo(repo_path, search_parent_directories=True)
-    branch = repo.active_branch.name
-    last_commit = repo.head.commit
-    return {
-        'branch': branch,
-        'last_commit': {
-            'hexsha': last_commit.hexsha,
-            'author': last_commit.author.name,
-            'summary': last_commit.summary,
-            'date': last_commit.authored_datetime
-        }
-    }
+def count_connections(port):
+    count = 0
+    connections = psutil.net_connections(kind='inet')
+    for conn in connections:
+        if conn.laddr.port == port and conn.status == 'ESTABLISHED':
+            count += 1
+    return count
 
-# 使用当前目录作为仓库路径
-git_info = get_git_info()
-print("Current Branch:", git_info['branch'])
-print("Last Commit:")
-print("  SHA:", git_info['last_commit']['hexsha'])
-print("  Author:", git_info['last_commit']['author'])
-print("  Summary:", git_info['last_commit']['summary'])
-print("  Date:", git_info['last_commit']['date'])
+# 示例：监控端口8080的活动连接数
+port = 8080
+active_connections = count_connections(port)
+print(f"Active connections on port {port}: {active_connections}")

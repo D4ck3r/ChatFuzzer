@@ -10,8 +10,9 @@ class Sender:
         self.host = host
         self.port = port
         self.socket = None
+        self.lock = asyncio.Lock()
 
-    async def send_http_request(self, package, session=None, timeout=60, fssl=None):
+    async def send_http_request(self, package, session=None, timeout=60, fssl=None, stype="fuzz"):
         writer = None
         response = None  # 初始化 response 为 None
         ssl_context = None
@@ -30,6 +31,9 @@ class Sender:
             await writer.drain()
 
             response = await asyncio.wait_for(reader.read(), timeout=timeout)
+            if response.decode().startswith("HTTP") and stype == "fuzz":
+                async with self.lock:
+                    utils.display.seed_response_num += 1
         except asyncio.TimeoutError:
             logging.info(f"Operation timed out after {timeout} seconds")
         except ssl.SSLError as e:
