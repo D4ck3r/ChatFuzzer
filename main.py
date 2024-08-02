@@ -44,6 +44,9 @@ async def main():
     mutator_task = asyncio.create_task(mutator.task(utils.seed_template_queue)) # mutator  seed_template_queue from seed scheduling
     fuzzer_task = asyncio.create_task(fuzzer.task(utils.header_send_queue, utils.content_send_queue))
 
+    # Code Analyse
+    code_task = asyncio.create_task(utils.display.run())
+    
     await asyncio.gather(display_task, rabbit_consumer, producer_task, gpt_task, monitor_task, scheduling_task, mutator_task, fuzzer_task)
     # await asyncio.gather(rabbit_consumer, producer_task, monitor_task, mutator_task, fuzzer_task)
 
