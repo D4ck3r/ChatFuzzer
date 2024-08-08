@@ -16,12 +16,16 @@ class OpenAIChatbot:
         self.gpt_config = self.config['GPT-Turbo']
         if chat_type == "header":
             self.session_file_path = self.config['Session']['header_session']
+            self.flag = "request"
         elif chat_type == "content":
             self.session_file_path = self.config['Session']['content_session']
+            self.flag = "request"
         elif chat_type == "code":
             self.session_file_path = self.config['Session']['code_session']
+            self.flag = "code"
         elif chat_type == "package_code":
             self.session_file_path = self.config['Session']['package_code_session']
+            self.flag = "code"
 
         if self.proxy:
             self.proxies = {
@@ -63,7 +67,11 @@ class OpenAIChatbot:
             return ''
 
     async def chat(self, user_input):
-        utils.display.gpt_vars["LLM request packages"] += 1
+        if self.flag == "request":
+            utils.display.gpt_vars["LLM request packages"] += 1
+        elif self.flag == "code":
+            utils.display.gpt_vars["LLM Code Analysis"] += 1
+        
         self.tmp_messages = self.messages.copy()
         self.tmp_messages.append({"role": "user", "content": user_input})
         data = {

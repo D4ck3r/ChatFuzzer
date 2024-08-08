@@ -11,6 +11,7 @@ from rich.box import ROUNDED
 from datetime import datetime, timedelta
 import git
 import psutil
+from utils import utils
 
 class RichLoggerDisplay:
     def __init__(self, global_config):
@@ -92,8 +93,8 @@ class RichLoggerDisplay:
         while True:
             self.temlates_vars["Seeds"] = str(self.send_seed_num)+"/"+str(self.seed_num)+ f" ({self.seed_response_num})"
             self.temlates_vars["Seed Templates"] = str(self.unique_template_num) + "/" + str(self.template_num) 
-            self.temlates_vars["Fuzz Connection"] = await self.count_connections(self.product["port"], self.product["host"])
-            await asyncio.sleep(0.05)
+            self.temlates_vars["Fuzz Connection"] = await utils.connect_count.get_value() #await self.count_connections(self.product["port"], self.product["host"])
+            await asyncio.sleep(0.0005)
 
     def render_introduction_table(self):
         # Create a table with a title and a rounded box, but without shown headers

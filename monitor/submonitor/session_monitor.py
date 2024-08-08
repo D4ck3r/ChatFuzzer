@@ -25,26 +25,35 @@ class SessionMonitor:
         except Exception as e:
             return f"An error occurred: {str(e)}"
 
-    async def session_check(self):
+    async def session_check(self, session_event):
         logging.info("send login_check package")
         data = self.get_package(self.check_package)
         response = None
         while True:
-            await asyncio.sleep(3)  # Non-blocking sleep
             try:
                 response = await self.sender.send_http_request(data, utils.session, fssl= utils.fssl, stype="monitor")
             except ConnectionResetError as e:
                 logging.info(f"Connection was reset by peer - {e}")
-
+            logging.debug(response)
             if response and utils.monitor_instance.check_login(response):
-                await self.session_login()
+                await self.session_login(session_event)
             else:
                 logging.info("login holding")
+            await asyncio.sleep(3)  # Non-blocking sleep
 
-    async def session_login(self):
+
+    async def session_login(self, session_event):
         response = None
         logging.info("send login package")
-        
+        session_event.clear()
+        # logging.error("session_event clear")
+
+        # while True:
+        #     if await utils.connect_count.is_zero():
+        #         break
+        #     # logging.error("wait connection")
+
+        #     await asyncio.sleep(1)
         for item in self.login_package:
             data = self.get_package(item)
             try:
@@ -53,13 +62,13 @@ class SessionMonitor:
                 logging.info(f"Connection was reset by peer - {e}")
             if response:
                 utils.session = utils.monitor_instance.extract_session(response)
+                # await self.session_check()
                 if utils.session != None and utils.session != b'':
                     await utils.write_to_file("monitor/session.data", utils.session)
+        # logging.error()
+        session_event.set()
+        logging.error("session_event set")
 
-    async def manage_sessions(self):
-        # Assume you want to run these concurrently
-        # await asyncio.gather(
-        #     self.session_check(),
-        #     self.session_login()
-        # )
-        await self.session_check()
+
+    async def manage_sessions(self, session_event):
+        await self.session_check(session_event)

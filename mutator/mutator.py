@@ -12,7 +12,7 @@ class Mutator:
         self.seed_lock = asyncio.Lock()
 
     async def header_mutator(self, data): # data <- seed template
-        logging.info("mutator header: ")
+        # logging.info("mutator header: ")
         for index, (value, type_, count) in enumerate(data.header_marked_fields):
             res = self.ms.mutator(value, type_)
             # res.extend(self.ms.radamsa_mutator(value, 100))
@@ -21,7 +21,7 @@ class Mutator:
     async def content_mutator(self, data): # data <- seed template
         # rad = Radamsa()
         # muta_data = self.rad.fuzz(data.encode("utf-8"))
-        logging.info("mutator content: ")
+        # logging.info("mutator content: ")
         # print(data.content_marked_fields)
         # for index, (value, type_, count) in enumerate(data.content_marked_fields):
         for index in data.content_mutate_array:
@@ -59,18 +59,18 @@ class Mutator:
         await self.content_mutator(item)
         await self.header_mutator(item)
         # print(item)
-        logging.info("mutator process_item")
+        # logging.info("mutator process_item")
 
       
 
     async def consume(self, queue, index):
         while True:
-            logging.info("mutator begain")
+            # logging.info("mutator begain")
             item = await queue.get_item()
-            logging.info("Priority: %s"%(item.priority))
+            # logging.info("Priority: %s"%(item.priority))
             await self.process_item(item)
             # await asyncio.sleep(3)
-            logging.info(f"Consumer {index} processed an item")
+            # logging.info(f"Consumer {index} processed an item")
             # await queue.put_item(item, 2)
 
     async def test(self):

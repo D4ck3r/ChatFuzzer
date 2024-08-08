@@ -10,6 +10,7 @@ import aiofiles
 import importlib
 import os
 from utils.terminal import RichLoggerDisplay 
+from utils.async_counter import AsyncCounter
 
 raw_http_queue = None
 seed_template_queue = None
@@ -36,6 +37,8 @@ leaf_tp_dict = {}
 vul_package = []
 fssl = None
 display = None
+
+connect_count = AsyncCounter()
 
 def init_ssl():
     global fssl, ftype

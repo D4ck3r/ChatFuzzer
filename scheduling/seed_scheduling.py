@@ -27,7 +27,7 @@ class SeedScheduling():
                 template.times += 1
                 await queue.put_item(template, 1)
 
-            logging.info(f"Seed Scheduling {index} processed an template")
+            # logging.info(f"Seed Scheduling {index} processed an template")
             await asyncio.sleep(1)
 
 # queue <- seed_template_queue

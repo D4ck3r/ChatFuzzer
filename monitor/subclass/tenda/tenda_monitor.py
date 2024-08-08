@@ -9,7 +9,7 @@ class TendaMonitor(MonitorInterface):
     def check_login(self, response):
         is_redirect = b"302 Redirect" in response.splitlines()[0]
         if is_redirect:
-            logging.info("check login 302 ")
+            logging.info("check login 302 1")
         return is_redirect
     
     def restruct_session(self, session, package):

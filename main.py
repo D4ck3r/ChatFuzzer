@@ -1,6 +1,7 @@
 import asyncio
 from generate.rawhttp_deal import consumers
 from generate.rawhttp_receiver import AsyncRabbitMQConsumer
+from gpt.gpt_code_analyse import LLMCodeAnalyse
 from gpt.gpt_task import task
 from utils import utils
 from monitor.submonitor.session_monitor import SessionMonitor
@@ -27,9 +28,10 @@ async def main():
     mutator = Mutator()
     fuzzer = Fuzzer()
     checker = SystemChecker()
+    codegpt =  LLMCodeAnalyse()
     results = checker.run_checks()
-    
     await consumer.connect()
+    session_event = asyncio.Event()
 
     # Algorithm 1
     display_task = asyncio.create_task(utils.display.run())
@@ -39,18 +41,20 @@ async def main():
     gpt_task = asyncio.create_task(task(utils.gpt_chat_queue)) #gpt task generate seed template
     
     # Algorithm 2
-    monitor_task = asyncio.create_task(monitor.task(utils.vul_package_queue))
+    monitor_task = asyncio.create_task(monitor.task(utils.vul_package_queue, session_event))
     scheduling_task = asyncio.create_task(scheduling.task(utils.seed_template_queue))
     mutator_task = asyncio.create_task(mutator.task(utils.seed_template_queue)) # mutator  seed_template_queue from seed scheduling
-    fuzzer_task = asyncio.create_task(fuzzer.task(utils.header_send_queue, utils.content_send_queue))
+    fuzzer_task = asyncio.create_task(fuzzer.task(utils.header_send_queue, utils.content_send_queue, session_event))
 
     # Code Analyse
-    code_task = asyncio.create_task(utils.display.run())
+    code_task = asyncio.create_task(codegpt.task())
     
-    await asyncio.gather(display_task, rabbit_consumer, producer_task, gpt_task, monitor_task, scheduling_task, mutator_task, fuzzer_task)
+    await asyncio.gather(display_task, rabbit_consumer, producer_task, gpt_task, monitor_task, scheduling_task, mutator_task, fuzzer_task, code_task)
     # await asyncio.gather(rabbit_consumer, producer_task, monitor_task, mutator_task, fuzzer_task)
-
+    # await asyncio.gather(monitor_task)
+    
 if __name__ == '__main__':
     # utils.clear_folder_contents("debug")
     # utils.clear_folder_contents("fuzz/result")
     asyncio.run(main(), debug=True)
+

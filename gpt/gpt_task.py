@@ -11,6 +11,8 @@ import aiofiles
 
 chatbot_header = OpenAIChatbot(config_file="config.ini", chat_type="header")
 chatbot_content = OpenAIChatbot(config_file="config.ini", chat_type="content")
+chatbot_routercode = OpenAIChatbot(config_file="config.ini", chat_type="code")
+chatbot_packagecode = OpenAIChatbot(config_file="config.ini", chat_type="package_code")
 
 async def generate_seed_template(item,label_head,label_content):
     seedtemplate = SeedTemplate(map_id = item["hash"], priority = 1)
@@ -51,9 +53,10 @@ async def process_item(item, queue):
 
         if label_head == "error" or label_content == "error":
             await queue.put(item)
+        else:
             # if item['hash'] in utils.rawhttp_dict:
             #     utils.rawhttp_dict.pop(item['hash'])
-        await generate_seed_template(item, label_head, label_content)
+            await generate_seed_template(item, label_head, label_content)
         # print(item["hash"])
     # await asyncio.sleep(40)
 
