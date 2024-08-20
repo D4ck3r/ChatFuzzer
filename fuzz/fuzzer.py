@@ -1,4 +1,5 @@
 import asyncio
+from mutator.structure.seed_template import SeedTemplate
 from utils import utils
 from sender.sender import Sender
 import logging
@@ -6,6 +7,7 @@ import aiofiles
 import os 
 import pickle 
 from generate.rawhttp_feature_extraction import split_http_request
+import copy 
 
 class Fuzzer:
     def __init__(self) -> None:
@@ -52,8 +54,6 @@ class Fuzzer:
             await utils.vul_package_queue.put(package)
         # if response and utils.monitor_instance.check_login(response): # check login status
         #     await self.header_send_queue.put(data)
-
-        
         return response
         # print(response)
 
@@ -74,22 +74,28 @@ class Fuzzer:
         header, content = split_http_request(response.decode())
         res_md5 = utils.calculate_md5(content)
 
-        if res_md5 not in utils.root_tp_dict[item["id"]].response:
-            utils.root_tp_dict[item["id"]].response.append(res_md5)
+        if res_md5 not in utils.all_tp_dict[item["id"]].response: # create new seed template
+            utils.all_tp_dict[item["id"]].response.append(res_md5)
+            temp_sp: SeedTemplate = copy.deepcopy(utils.all_tp_dict[item["id"]])
+            temp_sp.renew_object(item["index"], ftype)
+            new_id = utils.generate_uuid4()
+            temp_sp.set_id(new_id)
+            temp_sp.times = 0
+            await temp_sp.save_to_file(os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], new_id))
+            utils.all_tp_dict[item["id"]].child_dict[new_id] = temp_sp
+            utils.all_tp_dict[new_id] = temp_sp
+            utils.display.template_num += 1
+            utils.display.temlates_vars["Leaf ST"] += 1
         # logging.info("fuzzer process_item")
 
     async def consume(self, queue, index, fuzz_type, session_event):
         await asyncio.sleep(3)
         while True:
-            # logging.info(fuzz_type + "fuzzer begain")
             await session_event.wait()
             await utils.connect_count.increment()
-
-            # logging.error("session_event end")
-
             item = await queue.get()
             # logging.info("Priority: %s"%(item.priority))
-            await self.process_item(item, ftype=fuzz_type) # item <- {"id":id, "package": package}
+            await self.process_item(item, ftype=fuzz_type) # item <- {"id": fields_array.map_id, "package": package, "index": index, "mutation": item}
             # await asyncio.sleep(3)
             # logging.info(f"{fuzz_type} Consumer {index} processed an item")
             await utils.connect_count.decrement()
@@ -100,4 +106,4 @@ class Fuzzer:
         header_consumers = [asyncio.create_task(self.consume(header_send_queue, index, "header", session_event)) for index in range(20)]
         content_consumers = [asyncio.create_task(self.consume(content_send_queue, index, "content", session_event)) for index in range(20)]
         # test = [asyncio.create_task(self.test()) for _ in range(5)]
-        await asyncio.gather(*header_consumers, *content_consumers) 
+        await asyncio.gather(*header_consumers, *content_consumers)

@@ -22,11 +22,10 @@ class LLMCodeAnalyse():
                 response = await chatbot_routercode.chat(content)
             elif label == "package":
                 response = await chatbot_packagecode.chat(content)
-
             if response == "error":
                 await self.queue.put((file_path, label, content))
                 continue
-
+            
             segments = response.split(b"-+-+-+-+")
             for item in segments:
                 temp = item.strip()

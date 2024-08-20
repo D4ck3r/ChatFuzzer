@@ -32,7 +32,6 @@ class RichLoggerDisplay:
             "Leaf ST": 0,
             "Thompson Sampling Round": 0,
             "Fuzz Connection": 0
-
         }
 
         self.info_vars = {

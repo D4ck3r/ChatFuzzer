@@ -29,9 +29,14 @@ session = None
 
 rawhttp_dict = {}
 
-tp_dict = {}
+
+
+all_tp_dict = {}
 root_tp_dict = {}
 leaf_tp_dict = {}
+all_tp_hash_array = [] # store all seed template hash 
+
+
 # tp_processing_count = 0
 
 vul_package = []
@@ -94,7 +99,7 @@ def calculate_md5(text):
     return md5_obj.hexdigest()
 
 def generate_uuid4():
-    return uuid.uuid4()
+    return str(uuid.uuid4())
 
 def parse_config(filename):
     global global_config, display

@@ -8,12 +8,13 @@ import logging
 from utils import utils
 
 class OpenAIChatbot:
-    def __init__(self, config_file='config.ini', chat_type="header"):
+    def __init__(self, config_file='config.ini', chat_type="header", gpt_model = None):
         self.config = self.load_config(config_file)
         self.api_key = self.config['OpenAI']['api_key']
         self.endpoint = self.config['OpenAI']['endpoint']
         self.proxy = self.config['OpenAI']['proxy']
         self.gpt_config = self.config['GPT-Turbo']
+        self.gpt_model = gpt_model
         if chat_type == "header":
             self.session_file_path = self.config['Session']['header_session']
             self.flag = "request"
@@ -75,7 +76,7 @@ class OpenAIChatbot:
         self.tmp_messages = self.messages.copy()
         self.tmp_messages.append({"role": "user", "content": user_input})
         data = {
-            "model": self.gpt_config['model'],
+            "model": self.gpt_config['model'] if self.gpt_model == None else self.gpt_model,
             "messages": self.tmp_messages,
             "max_tokens": int(self.gpt_config['max_tokens']),
             "temperature": float(self.gpt_config['temperature']),

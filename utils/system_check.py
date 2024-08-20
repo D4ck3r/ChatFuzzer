@@ -3,6 +3,8 @@ import os
 from rich.progress import Progress
 from mutator.structure.seed_template import SeedTemplate
 from utils import utils
+import pika
+import sys
 
 class SystemChecker:
     def __init__(self):
@@ -12,11 +14,21 @@ class SystemChecker:
             (self.check_file_system, "Check File System"),
             (self.check_template_dir, "Check & Load Seed Template DIR")
         ]
+        self.config = utils.global_config
+
 
     def check_rabbitmq(self):
-        time.sleep(1)  
-        return "RabbitMQ Connect Success"
-
+        connection_params = pika.URLParameters(self.config['RabbitMQ']['url'])
+        try:
+            connection = pika.BlockingConnection(connection_params)
+            if connection.is_open:
+                connection.close()
+                return "RabbitMQ Connect Success"
+            else:
+                return "RabbitMQ Connection Failed"
+        except Exception  as e:
+            return f"RabbitMQ Connection Failed: {e}"
+        
     def check_gpt_api(self):
         time.sleep(2)  # 模拟API服务检查延时
         return "GPT API-KEY Avaliable"
@@ -29,8 +41,9 @@ class SystemChecker:
         # templates = []
         for filename in os.listdir(utils.global_config["Fuzzer"]["debug_dir_template"]):
             full_path = os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], filename)
-            template = SeedTemplate.load_from_file(full_path)
-            utils.root_tp_dict[template.map_id] = template
+            template: SeedTemplate = SeedTemplate.load_from_file(full_path)
+            utils.root_tp_dict[template.id] = template
+            utils.all_tp_dict[template.id] = template
             utils.display.template_num += 1
         return "Seed Template Load Success"
 
@@ -42,6 +55,9 @@ class SystemChecker:
 
             for task, description in self.tasks:
                 result = task()  # 直接调用同步函数
+                if "failed" in result.lower():
+                    progress.console.print(f"{description} [bold red]Failed![/]: {result}")
+                    sys.exit()
                 progress.console.print(f"{description} [bold green]Done![/]: {result}")
                 progress.update(task_progress, advance=1)
                 results.append(result)

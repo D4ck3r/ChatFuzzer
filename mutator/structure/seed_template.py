@@ -90,6 +90,12 @@ class SeedTemplate:
         # 使用正则表达式进行替换
         updated_header = re.sub(pattern, replacement, header)
         return updated_header
+    
+    def renew_object(self, index, ftype):
+        if ftype == "header":
+            self.header_mutate_array.remove(index)
+        elif ftype == "content":
+            self.content_mutate_array.remove(index)
 
     def __lt__(self, other):
             return self.priority < other.priority

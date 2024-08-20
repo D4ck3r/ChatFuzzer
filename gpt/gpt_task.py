@@ -11,22 +11,22 @@ import aiofiles
 
 chatbot_header = OpenAIChatbot(config_file="config.ini", chat_type="header")
 chatbot_content = OpenAIChatbot(config_file="config.ini", chat_type="content")
-chatbot_routercode = OpenAIChatbot(config_file="config.ini", chat_type="code")
-chatbot_packagecode = OpenAIChatbot(config_file="config.ini", chat_type="package_code")
+chatbot_routercode = OpenAIChatbot(config_file="config.ini", chat_type="code", gpt_model="gpt-4o-mini")
+chatbot_packagecode = OpenAIChatbot(config_file="config.ini", chat_type="package_code", gpt_model="gpt-4o-mini")
 
-async def generate_seed_template(item,label_head,label_content):
+async def generate_seed_template(item, label_head, label_content):
     seedtemplate = SeedTemplate(map_id = item["hash"], priority = 1)
     seedtemplate.set_id(utils.generate_uuid4())
     seedtemplate.set_label_header(label_head)
     seedtemplate.set_label_content(label_content)
     seedtemplate.set_header_mutate_array()
     seedtemplate.set_content_mutate_array()
-    utils.root_tp_dict[item["hash"]] = seedtemplate
-    utils.tp_dict[item["hash"]] = seedtemplate
+    utils.root_tp_dict[seedtemplate.id] = seedtemplate
+    utils.all_tp_dict[seedtemplate.id] = seedtemplate
     if utils.global_config["Fuzzer"]["model"] == "DEBUG":
         # async with aiofiles.open(os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], str(seedtemplate.id)), 'wb') as file:
         #     await file.write(pickle.dumps(seedtemplate))
-        await seedtemplate.save_to_file(os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], str(seedtemplate.id)))
+        await seedtemplate.save_to_file(os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], seedtemplate.id))
        
     # await utils.seed_template_queue.put_item(seedtemplate, priority=1)
     utils.display.template_num += 1
@@ -45,12 +45,11 @@ async def process_item(item, queue):
     content = item["head_content"]["content"]
     label_head = ''
     label_content = ''
-    if item["hash"] not in utils.root_tp_dict:
+    if item["hash"] not in utils.all_tp_hash_array: # use only create a new seed template
         if head:
             label_head = await chatbot_header.chat(head)
         if content:
             label_content = await chatbot_content.chat(content)
-
         if label_head == "error" or label_content == "error":
             await queue.put(item)
         else:
