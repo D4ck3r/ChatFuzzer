@@ -41,10 +41,13 @@ class SystemChecker:
         # templates = []
         for filename in os.listdir(utils.global_config["Fuzzer"]["debug_dir_template"]):
             full_path = os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], filename)
-            template: SeedTemplate = SeedTemplate.load_from_file(full_path)
-            utils.root_tp_dict[template.id] = template
-            utils.all_tp_dict[template.id] = template
-            utils.display.template_num += 1
+            try:
+                template: SeedTemplate = SeedTemplate.load_from_file(full_path)
+                utils.root_tp_dict[template.id] = template
+                utils.all_tp_dict[template.id] = template
+                utils.display.template_num += 1
+            except Exception as e:
+                print("[-] unpick error")
         return "Seed Template Load Success"
 
     def run_checks(self):
