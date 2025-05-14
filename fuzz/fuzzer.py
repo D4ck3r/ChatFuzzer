@@ -35,8 +35,6 @@ class Fuzzer:
 
         # if response and utils.monitor_instance.check_login(response): # check login status
         #     await self.header_send_queue.put(data)
-
-        
         return response
         # print(response)
 
@@ -64,24 +62,26 @@ class Fuzzer:
             async with aiofiles.open(os.path.join(utils.global_config["Fuzzer"]["debug_dir_seed"], filename), 'wb') as file:
                 await file.write(pickle.dumps(item))
         # logging.info(item)
+        
         if ftype == "header":
             response = await self.header_fuzzer(item)
         elif ftype == "content":
             response = await self.content_fuzzer(item)
-        
+        # logging.error(item['package'])
+        # logging.error(response)
         if response == None:
             response = b''
         header, content = split_http_request(response.decode())
         res_md5 = utils.calculate_md5(content)
 
-        if res_md5 not in utils.all_tp_dict[item["id"]].response: # create new seed template
+        if response != b'' and res_md5 not in utils.all_tp_dict[item["id"]].response and "302 Redirect" not in header and len(item["mutation"]) < 20: # create new seed template
             utils.all_tp_dict[item["id"]].response.append(res_md5)
             temp_sp: SeedTemplate = copy.deepcopy(utils.all_tp_dict[item["id"]])
             temp_sp.renew_object(item["index"], ftype)
             new_id = utils.generate_uuid4()
             temp_sp.set_id(new_id)
             temp_sp.times = 0
-            await temp_sp.save_to_file(os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], new_id))
+            await temp_sp.save_to_file(os.path.join(utils.global_config["Fuzzer"]["debug_dir_template"], new_id), response=response,mutation=item)
             utils.all_tp_dict[item["id"]].child_dict[new_id] = temp_sp
             utils.all_tp_dict[new_id] = temp_sp
             utils.display.template_num += 1
@@ -103,7 +103,7 @@ class Fuzzer:
     async def task(self, header_send_queue, content_send_queue, session_event):
         self.header_send_queue = header_send_queue
         self.content_send_queue = content_send_queue
-        header_consumers = [asyncio.create_task(self.consume(header_send_queue, index, "header", session_event)) for index in range(20)]
-        content_consumers = [asyncio.create_task(self.consume(content_send_queue, index, "content", session_event)) for index in range(20)]
+        header_consumers = [asyncio.create_task(self.consume(header_send_queue, index, "header", session_event)) for index in range(0)]
+        content_consumers = [asyncio.create_task(self.consume(content_send_queue, index, "content", session_event)) for index in range(3)]
         # test = [asyncio.create_task(self.test()) for _ in range(5)]
         await asyncio.gather(*header_consumers, *content_consumers)

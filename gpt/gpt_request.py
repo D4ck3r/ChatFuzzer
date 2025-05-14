@@ -7,13 +7,14 @@ import binascii
 import logging
 from utils import utils
 
-class OpenAIChatbot:
-    def __init__(self, config_file='config.ini', chat_type="header", gpt_model = None):
+class Chatbot:
+    def __init__(self, config_file='config.ini', chat_type="header", gpt_model = None, api_key_prefix='OpenAI'):
         self.config = self.load_config(config_file)
-        self.api_key = self.config['OpenAI']['api_key']
-        self.endpoint = self.config['OpenAI']['endpoint']
-        self.proxy = self.config['OpenAI']['proxy']
-        self.gpt_config = self.config['GPT-Turbo']
+        self.api_key_prefix = api_key_prefix
+        self.api_key = self.config[api_key_prefix]['api_key']
+        self.endpoint = self.config[api_key_prefix]['endpoint']
+        self.proxy = self.config[api_key_prefix]['proxy']
+        # self.config[api_key_prefix] = self.config['GPT-Turbo']
         self.gpt_model = gpt_model
         if chat_type == "header":
             self.session_file_path = self.config['Session']['header_session']
@@ -27,6 +28,9 @@ class OpenAIChatbot:
         elif chat_type == "package_code":
             self.session_file_path = self.config['Session']['package_code_session']
             self.flag = "code"
+        elif chat_type == "vul":
+            self.session_file_path = self.config['Session']['vul_session']
+            self.flag = "vul" 
 
         if self.proxy:
             self.proxies = {
@@ -54,6 +58,16 @@ class OpenAIChatbot:
             messages = [{"role": "system", "content": "You are a http protocol expert..."}]
         return messages
     
+    def multi_line_input(self, prompt="Input Your Question: ", terminator="END"):
+        print(prompt + " (Type '{}' and press Enter to finish)".format(terminator))
+        lines = []
+        while True:
+            line = input()
+            if line.strip() == terminator:
+                break
+            lines.append(line)
+        return "\n".join(lines)
+    
     def read_from_file(self):
         filename = input("Please enter the filename: ")  # Prompting the user for the filename in English
         try:
@@ -75,13 +89,14 @@ class OpenAIChatbot:
         
         self.tmp_messages = self.messages.copy()
         self.tmp_messages.append({"role": "user", "content": user_input})
+        print(self.config[self.api_key_prefix]['n'])
         data = {
-            "model": self.gpt_config['model'] if self.gpt_model == None else self.gpt_model,
+            "model": self.config[self.api_key_prefix]['model'] if self.gpt_model == None else self.gpt_model,
             "messages": self.tmp_messages,
-            "max_tokens": int(self.gpt_config['max_tokens']),
-            "temperature": float(self.gpt_config['temperature']),
-            "top_p": int(self.gpt_config['top_p']),
-            "n": int(self.gpt_config['n'])
+            "max_tokens": int(self.config[self.api_key_prefix]['max_tokens']),
+            "temperature": float(self.config[self.api_key_prefix]['temperature']),
+            "top_p": int(self.config[self.api_key_prefix]['top_p']),
+            "n": int(self.config[self.api_key_prefix]['n'])
         }
         async with httpx.AsyncClient(proxies=self.proxies, timeout=10) as client:
             try:
@@ -92,6 +107,7 @@ class OpenAIChatbot:
                 
                 try:
                     response_data = response.json()
+                    # print(response_data)
                     response_text = response_data['choices'][0]['message']['content']
                     response_text = response_text.strip()
                     if '\r\n' not in response_text:
@@ -109,13 +125,13 @@ class OpenAIChatbot:
                 return 'error'
 
 async def main():
-    chatbot = OpenAIChatbot(config_file="../config.ini", chat_type="header")
+    chatbot = Chatbot(config_file="../config.ini", chat_type="header")
     while True:
         user_input = input("Input Your Question (Type 'exit' and press Enter to finish): ")
         if user_input.lower() == "exit":
             break
         response = await chatbot.chat(user_input)
-        print(response)
+        # print(response)
 
 if __name__ == "__main__":
     asyncio.run(main())

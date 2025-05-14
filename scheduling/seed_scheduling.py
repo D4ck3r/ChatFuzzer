@@ -19,31 +19,30 @@ class SeedScheduling():
         return top_templates
     
     async def select_all_sp(self, seed_templates_dict, queue):
-        logging.error("######start")
+        # logging.error("######start")
         list_queue = asyncio.Queue()
         selected_templates = self.select_top_percent(seed_templates_dict, 20)
-        await asyncio.sleep(5)
+        # await asyncio.sleep(1)
         for _, template in selected_templates.items():
             await list_queue.put(template)
         
         while not list_queue.empty():
-            
             item: SeedTemplate = await list_queue.get()
             if utils.all_tp_dict[item.id].times == 0:
                 utils.display.unique_template_num += 1
-                logging.error("got 1 "+item.id)
+                # logging.error("got 1 "+item.id)
                 # logging.error(item.id+"--"+str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3] )+"-------")
             utils.all_tp_dict[item.id].times += 1
-            logging.error(item.id+"--"+str(item.times)+'--'+str(utils.all_tp_dict[item.id].times))
+            # logging.error(item.id+"--"+str(item.times)+'--'+str(utils.all_tp_dict[item.id].times))
             await queue.put_item(item, 1)
             selected_templates_child = self.select_top_percent(item.child_dict, 20)
-            
+             
             for _, item1 in selected_templates_child.items():
                 await list_queue.put(item1)
         output = ''
         for _, temp in utils.all_tp_dict.items():
             output += temp.id + '|' + str(temp.times) + '\n'
-        logging.error("\n"+output+"######end")
+        # logging.error("\n"+output+"######end")
 
             # list_queue.task_done()
 

@@ -4,15 +4,15 @@ from utils import utils
 import random
 import time
 from mutator.structure.seed_template import SeedTemplate
-from gpt.gpt_request import OpenAIChatbot
+from gpt.gpt_request import Chatbot
 import os 
 import pickle
 import aiofiles
 
-chatbot_header = OpenAIChatbot(config_file="config.ini", chat_type="header")
-chatbot_content = OpenAIChatbot(config_file="config.ini", chat_type="content")
-chatbot_routercode = OpenAIChatbot(config_file="config.ini", chat_type="code", gpt_model="gpt-4o-mini")
-chatbot_packagecode = OpenAIChatbot(config_file="config.ini", chat_type="package_code", gpt_model="gpt-4o-mini")
+chatbot_header = Chatbot(config_file="config.ini", chat_type="header",gpt_model="gpt-4o-2024-08-06")
+chatbot_content = Chatbot(config_file="config.ini", chat_type="content")
+chatbot_routercode = Chatbot(config_file="config.ini", chat_type="code", gpt_model="gpt-4o-mini")
+chatbot_packagecode = Chatbot(config_file="config.ini", chat_type="package_code", gpt_model="gpt-4o-mini")
 
 async def generate_seed_template(item, label_head, label_content):
     seedtemplate = SeedTemplate(map_id = item["hash"], priority = 1)

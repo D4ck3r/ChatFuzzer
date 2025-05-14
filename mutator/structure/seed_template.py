@@ -2,6 +2,7 @@ import re
 import random
 import aiofiles
 import pickle
+from utils import utils
 
 class SeedTemplate:
     def __init__(self, priority, map_id):
@@ -11,6 +12,7 @@ class SeedTemplate:
         self.content_marked_fields = []
         self.content_unmarked_fields = []
         self.content_mutate_array = []
+        self.mutation_dict = {"header":[],"content":[]}
         # self.send_header = None
         # self.send_content = None
         self.id = None
@@ -100,9 +102,17 @@ class SeedTemplate:
     def __lt__(self, other):
             return self.priority < other.priority
     
-    async def save_to_file(self, filename):
+    async def save_to_file(self, filename, response=b"NULL", mutation={"id": '', "package": '', "index": -1, "mutation": b'NULL'}):
         async with aiofiles.open(filename, 'wb') as output_file:
             await output_file.write(pickle.dumps(self))
+        
+        if utils.global_config["Fuzzer"]["model"] == "DEBUG":
+            async with aiofiles.open(filename+'-response', 'wb') as output_file:
+                await output_file.write(response)
+            async with aiofiles.open(filename+'-mutation', 'wb') as output_file:
+                await output_file.write(mutation["mutation"])
+            async with aiofiles.open(filename+'-index', 'w') as output_file:
+                await output_file.write(str(mutation["index"]))
 
     @staticmethod
     def load_from_file(filename):

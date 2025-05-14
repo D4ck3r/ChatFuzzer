@@ -39,13 +39,14 @@ class SessionMonitor:
                 await self.session_login(session_event)
             else:
                 logging.info("login holding")
-            await asyncio.sleep(3)  # Non-blocking sleep
-
+            await asyncio.sleep(1)  # Non-blocking sleep
 
     async def session_login(self, session_event):
         response = None
-        logging.info("send login package")
         session_event.clear()
+        await asyncio.sleep(10)
+        logging.info("send login package------")
+
         # logging.error("session_event clear")
 
         # while True:
@@ -65,9 +66,14 @@ class SessionMonitor:
                 # await self.session_check()
                 if utils.session != None and utils.session != b'':
                     await utils.write_to_file("monitor/session.data", utils.session)
+                    logging.info("session === ")
+                    logging.info(utils.session)
+        
+        await asyncio.sleep(10)
+
         # logging.error()
         session_event.set()
-        logging.error("session_event set")
+        logging.error("session_event set++++++")
 
 
     async def manage_sessions(self, session_event):

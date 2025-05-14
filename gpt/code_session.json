@@ -17,7 +17,7 @@
   },
   {
     "role": "assistant",
-    "content": "POST /goform/SetSambaCfg HTTP/1.1\r\nHost: 192.168.0.200\r\nContent-Length: 101\r\nCookie: \r\n\r\nfileCode=UTF-8&password=admin&premitEn=0&guestpwd=guest&guestuser=guest&guestaccess=r&internetPort=21&action=del-+-+-+-+POST /goform/SetSambaCfg HTTP/1.1\r\nHost: 192.168.0.200\r\nContent-Length: 101\r\nCookie: \r\n\r\nfileCode=UTF-8&password=admin&premitEn=0&guestpwd=guest&guestuser=guest&guestaccess=r&internetPort=21&action=add"
+    "content": "POST /goform/SetSambaCfg HTTP/1.1\r\nHost: 192.168.0.200\r\nContent-Length: 101\r\nCookie: \r\n\r\nfileCode=UTF-8&password=admin&premitEn=0&guestpwd=guest&guestuser=guest&guestaccess=r&internetPort=21&action=del-+-+-+-+POST /goform/SetSambaCfg HTTP/1.1\r\nHost: 192.168.0.200\r\nContent-Length: 101\r\nCookie: \r\n\r\nfileCode=UTF-8&password=admin&premitEn=0&guestpwd=guest&guestuser=guest&guestaccess=r&internetPort=21&action=add&usbName=test"
   },
   {
     "role": "user",

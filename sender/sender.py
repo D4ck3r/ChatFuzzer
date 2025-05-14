@@ -24,7 +24,8 @@ class Sender:
         try:
             reader, writer = await asyncio.wait_for(
                 asyncio.open_connection(self.host, self.port, ssl=ssl_context), timeout=timeout)
-
+            logging.info(session)
+            logging.info(package)
             if session:
                 package = utils.monitor_instance.restruct_session(session, package)
             writer.write(package)
@@ -41,6 +42,9 @@ class Sender:
                 logging.info("SSL close notify received, stopping communication.")
             else:
                 logging.error(f"SSL error occurred: {e}")
+        except ConnectionResetError as e:
+            logging.error(f"Connection was reset by peer - {e}")
+            raise  # Re-throw the exception to be handled by outer layer
         except Exception as e:
             logging.error(f"An unexpected error occurred: {e}")
         finally:

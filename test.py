@@ -1,7 +1,7 @@
-from gpt.gpt_request import OpenAIChatbot
+from gpt.gpt_request import Chatbot
 from generate.rawhttp_feature_extraction import split_http_request
-chatbot_header = OpenAIChatbot(config_file="config.ini", chat_type="header")
-chatbot_content = OpenAIChatbot(config_file="config.ini", chat_type="content")
+chatbot_header = Chatbot(config_file="config.ini", chat_type="header")
+chatbot_content = Chatbot(config_file="config.ini", chat_type="content")
 
 while True:
     # user_input = chatbot.multi_line_input()

@@ -15,6 +15,7 @@ class MutationStrategy:
         res = []
         res.append(b"1")
         res.append(b"65535")
+        res.append(b"1"*2000)
         return res
     
     def radamsa_mutator(self, data, times):
